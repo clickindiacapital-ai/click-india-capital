@@ -1,0 +1,195 @@
+{
+  "nav": {
+    "home": "Home",
+    "productsAndServices": "Products & Services",
+    "vehicleLoans": "Vehicle Loans",
+    "personalLoans": "Personal Loans",
+    "businessLoans": "Business Loans",
+    "homeLoans": "Home Loans",
+    "applyNow": "Apply Now"
+  },
+  "home": {
+    "promo": "✓ 50+ Trusted Lending Partners",
+    "title1": "CLICK INDIA CAPITAL",
+    "title2": "Dream Big. Borrow Smart.",
+    "subtitle": "Unlocking Potential, Together.",
+    "description": "Compare offers from leading lenders, check your eligibility instantly, and get expert assistance throughout your loan journey.",
+    "checkEligibility": "See My Options",
+    "calculateEmi": "Calculate EMI",
+    "productsTitle": "Our Loan Solutions",
+    "productsSubtitle": "Tailored financial products to meet your unique needs.",
+    "testimonialsTitle": "Success Stories",
+    "testimonialsSubtitle": "Hear from our satisfied customers.",
+    "testimonials": [
+      {
+        "name": "Rajesh Kumar",
+        "role": "Small Business Owner",
+        "quote": "Click India Capital helped me secure a business loan in just 48 hours. Their process is incredibly fast and transparent."
+      },
+      {
+        "name": "Priya Sharma",
+        "role": "Software Engineer",
+        "quote": "The entire process of getting my new car loan was seamless. The relationship manager was extremely helpful."
+      },
+      {
+        "name": "Amit Patel",
+        "role": "First-time Homebuyer",
+        "quote": "I thought getting a home loan would be stressful, but they made it easy. Lowest interest rates and zero hidden charges."
+      }
+    ],
+    "floatingCta": "Apply Now"
+  },
+  "emi": {
+    "title": "EMI Calculator",
+    "subtitle": "Calculate your monthly installments instantly and plan your finances better.",
+    "loanAmount": "Loan Amount",
+    "interestRate": "Interest Rate (% p.a.)",
+    "tenure": "Loan Tenure (Years)",
+    "monthlyEmi": "Your Monthly EMI",
+    "principalAmount": "Principal Amount",
+    "totalInterest": "Total Interest",
+    "totalPayable": "Total Amount Payable",
+    "presets": {
+      "homeLoan": "Home Loan",
+      "personalLoan": "Personal Loan",
+      "carLoan": "Car Loan",
+      "businessLoan": "Business Loan"
+    },
+    "schedule": {
+      "title": "Amortization Schedule",
+      "year": "Year",
+      "principalPaid": "Principal Paid",
+      "interestPaid": "Interest Paid",
+      "totalPayment": "Total Payment",
+      "balance": "Balance"
+    }
+  },
+  "footer": {
+    "trust": {
+      "secure": "Secure & Encrypted Application Process",
+      "partners": "Trusted Lending Partners",
+      "transparent": "Transparent Process",
+      "support": "Dedicated Customer Support"
+    },
+    "about": "Your trusted partner in finding the right financial solutions. We connect you with top lending partners to make your dreams a reality.",
+    "quickLinks": {
+      "title": "Quick Links",
+      "home": "Home",
+      "aboutUs": "About Us",
+      "contactUs": "Contact Us"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Privacy Policy",
+      "terms": "Terms & Conditions",
+      "disclaimer": "Disclaimer",
+      "consent": "Consent & Authorization"
+    },
+    "support": {
+      "title": "Support",
+      "grievance": "Grievance Redressal",
+      "dataDeletion": "Data Deletion Request"
+    },
+    "copyright": "© 2026 Click India Capital. All Rights Reserved."
+  },
+  "eligibility": {
+    "title": "Check Your Eligibility",
+    "subtitle": "Find out how much you can borrow in just 2 minutes.",
+    "step1": "What type of loan do you need?",
+    "loanTypes": {
+      "vehicle": "Vehicle Loan",
+      "personal": "Personal Loan",
+      "business": "Business Loan",
+      "home": "Home Loan"
+    },
+    "applicationTitle": "{{type}} Loan Application",
+    "change": "Change",
+    "back": "Back",
+    "continue": "Continue",
+    "checkEligibility": "Check My Eligibility",
+    "approvedTitle": "You're Pre-Approved!",
+    "approvedSubtitle": "Based on your details, you are eligible for a {{type}} loan at highly competitive rates.",
+    "proceed": "Proceed with Application",
+    "fields": {
+      "employmentType": "Employment Type",
+      "selectEmployment": "Select Employment",
+      "salaried": "Salaried",
+      "selfEmployed": "Self Employed",
+      "netSalary": "Net Monthly Salary (₹)",
+      "companyName": "Company Name",
+      "businessVintage": "Business Vintage (Years)",
+      "annualTurnover": "Annual Turnover (₹)",
+      "gstRegistered": "GST Registered?",
+      "selectOption": "Select Option",
+      "yes": "Yes",
+      "no": "No",
+      "vehicleType": "Vehicle Type",
+      "selectType": "Select Type",
+      "newVehicle": "New Vehicle",
+      "usedVehicle": "Used Vehicle",
+      "onRoadPrice": "On-Road Price (₹)",
+      "desiredLoan": "Desired Loan Amount (₹)",
+      "propertyStatus": "Property Status",
+      "selectStatus": "Select Status",
+      "readyToMove": "Ready to Move",
+      "underConstruction": "Under Construction",
+      "plotPurchase": "Plot Purchase",
+      "propertyValue": "Estimated Property Value (₹)",
+      "existingEmis": "Existing Monthly EMIs (₹)",
+      "fullName": "Full Name",
+      "mobile": "Mobile Number",
+      "pan": "PAN Number",
+      "documents": "Upload Financial Documents (Optional)",
+      "documentsHint": "Upload credit report, bank statements, or salary slips to speed up approval."
+    },
+    "consents": {
+      "communication": "I hereby authorize Click India Capital and its lending partners to contact me via phone, SMS, WhatsApp, email, or other communication channels regarding loan products and related services. I have read and agree to the Privacy Policy and Terms & Conditions.",
+      "documents": "I voluntarily authorize Click India Capital to review and analyze my uploaded credit report, bank statements, and financial documents solely for eligibility assessment, lender matching, and loan facilitation purposes."
+    }
+  },
+  "products": {
+    "vehicle": {
+      "title": "Vehicle Loans",
+      "description": "Hit the road faster with our customized vehicle financing. Select the exact type of vehicle you are looking to finance below.",
+      "subTypes": {
+        "twoWheeler": {
+          "title": "Two Wheeler Loans",
+          "features": ["Up to 100% On-Road Funding", "No income proof for select profiles", "Instant digital approval", "Zero processing fee offers"]
+        },
+        "newCar": {
+          "title": "New Car Loans",
+          "features": ["Up to 100% On-Road Funding", "Flexible tenure up to 7 years", "Lowest EMI options", "Pre-approved top-up loans"]
+        },
+        "usedCar": {
+          "title": "Used Car Loans",
+          "features": ["Funding up to 150% of car valuation", "Multi-point inspection service", "Tenure up to 5 years", "Quick RC transfer assistance"]
+        },
+        "commercial": {
+          "title": "Commercial Vehicles",
+          "features": ["Fleet financing available", "Funding for body building", "Customized EMIs matching cash flow", "Fast track processing"]
+        }
+      }
+    },
+    "personal": {
+      "title": "Personal Loans",
+      "description": "Meet your personal financial needs with unsecured loans. Whether it's a wedding, medical emergency, or travel.",
+      "features": ["No collateral required", "Disbursal in 24 hours", "Minimal documentation", "Flexible repayment terms"]
+    },
+    "business": {
+      "title": "Business Loans",
+      "description": "Scale your enterprise with our customized business loans designed for working capital or expansion needs.",
+      "features": ["Loans up to ₹5 Crores", "Overdraft facilities available", "Dedicated relationship manager", "Collateral-free options available"]
+    },
+    "home": {
+      "title": "Home Loans",
+      "description": "Build your dream home with our flexible and affordable home loan solutions. Long tenures for lower EMIs.",
+      "features": ["Tenure up to 30 years", "Doorstep service", "No prepayment penalty", "Balance transfer facility"]
+    },
+    "premiumBenefits": "Premium Benefits",
+    "whyChoose": "Why choose our {{title}}?",
+    "startingRate": "Starting Interest Rate",
+    "pa": "p.a.",
+    "checkEligibility": "Check Eligibility Now",
+    "noImpact": "Takes less than 2 minutes. No impact on credit score."
+  }
+}

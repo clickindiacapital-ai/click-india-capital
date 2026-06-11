@@ -1,0 +1,20 @@
+{
+  "name": "click-india-ecosystem",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Unified Fintech Ecosystem - Monorepo",
+  "scripts": {
+    "dev:web": "pnpm --filter click-india-web dev",
+    "dev:crm": "pnpm --filter click-india-crm dev",
+    "dev:mobile": "pnpm --filter click-india-app start",
+    "build": "pnpm --filter \"@click-india/*\" build && pnpm --filter \"click-india-*\" build",
+    "lint": "pnpm -r lint",
+    "install:all": "pnpm install",
+    "clean": "pnpm -r exec rm -rf node_modules dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "turbo": "latest"
+  },
+  "packageManager": "pnpm@8.10.0"
+}

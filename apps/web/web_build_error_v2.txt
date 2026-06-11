@@ -1,0 +1,23 @@
+
+> click-india-web@ build D:\Sameers Projects\Aegis Nexus\Click Capital\apps\web
+> tsc && vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1913 modules transformed.
+[31mx[39m Build failed in 5.12s
+[31merror during build:
+[31m[vite]: Rollup failed to resolve import "@click-india/shared-ui" from "D:/Sameers Projects/Aegis Nexus/Click Capital/apps/web/src/components/ui/PaymentModal.tsx".
+This is most likely unintended because it can break your application at runtime.
+If you do want to externalize this module explicitly add it to
+`build.rollupOptions.external`[31m
+    at viteWarn (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/vite@5.4.21_@types+node@22.19.19/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:65855:17)
+    at onwarn (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/@vitejs+plugin-react-swc@3.11.0_vite@5.4.21/node_modules/@vitejs/plugin-react-swc/index.js:90:7)
+    at onRollupWarning (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/vite@5.4.21_@types+node@22.19.19/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:65885:5)
+    at onwarn (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/vite@5.4.21_@types+node@22.19.19/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:65550:7)
+    at file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:21403:13
+    at Object.logger [as onLog] (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:23384:9)
+    at ModuleLoader.handleInvalidResolvedId (file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:22128:26)
+    at file:///D:/Sameers%20Projects/Aegis%20Nexus/Click%20Capital/node_modules/.pnpm/rollup@4.60.3/node_modules/rollup/dist/es/shared/node-entry.js:22086:26[39m
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  click-india-web@ build: `tsc && vite build`
+Exit status 1
