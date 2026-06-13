@@ -1,0 +1,50 @@
+import { schedule } from '@netlify/functions';
+import Parser from 'rss-parser';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const parser = new Parser();
+
+// Run every day at 6:00 AM IST (which is 00:30 UTC)
+export const handler = schedule('30 0 * * *', async (event) => {
+  try {
+    console.log("Fetching daily financial news...");
+    
+    // Fetch from Economic Times Top Stories RSS
+    const feed = await parser.parseURL('https://economictimes.indiatimes.com/rssfeedstopstories.cms');
+    
+    // Get top 5 items
+    const topItems = feed.items.slice(0, 5);
+    
+    const insightsToInsert = topItems.map(item => ({
+      title: item.title || 'Financial Update',
+      summary: item.contentSnippet || item.content || 'No summary available.',
+      url: item.link || '',
+      source: 'Economic Times',
+      published_at: item.pubDate ? new Date(item.pubDate).toISOString() : new Date().toISOString()
+    }));
+    
+    // Insert into Supabase (ignoring duplicates based on URL unique constraint)
+    const { error } = await supabase
+      .from('daily_insights')
+      .upsert(insightsToInsert, { onConflict: 'url' });
+      
+    if (error) throw error;
+    
+    console.log(`Successfully processed ${insightsToInsert.length} news items.`);
+    
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Daily news updated successfully" })
+    };
+  } catch (error) {
+    console.error("Failed to fetch daily news:", error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to process news" })
+    };
+  }
+});

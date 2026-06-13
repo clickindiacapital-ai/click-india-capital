@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Car, Briefcase, UserCircle, Home, Bike, Truck, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Car, Briefcase, UserCircle, Home, Bike, Truck, Sparkles, CheckCircle2, ArrowRight, RefreshCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 
@@ -39,6 +39,13 @@ export default function LoanProducts() {
       title: t('products.vehicle.subTypes.commercial.title'),
       rate: "10.0%",
       features: t('products.vehicle.subTypes.commercial.features', { returnObjects: true }) as string[]
+    },
+    refinance: {
+      id: 'refinance',
+      icon: RefreshCcw,
+      title: t('products.vehicle.subTypes.refinance.title'),
+      rate: "11.0%",
+      features: t('products.vehicle.subTypes.refinance.features', { returnObjects: true }) as string[]
     }
   };
 
@@ -129,7 +136,7 @@ export default function LoanProducts() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
+            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12"
           >
             {Object.values(vehicleSubProducts).map((sub) => {
               const SubIcon = sub.icon;

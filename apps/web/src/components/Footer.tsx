@@ -1,9 +1,31 @@
 import { Link } from 'react-router-dom';
-import { ShieldCheck, HeartHandshake, CheckCircle2, Headset } from 'lucide-react';
+import { ShieldCheck, HeartHandshake, CheckCircle2, Headset, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { supabase } from '../utils/supabase';
 
 export default function Footer() {
   const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    
+    setStatus('loading');
+    const { error } = await supabase
+      .from('subscribers')
+      .insert([{ email }]);
+      
+    if (error) {
+      console.error(error);
+      setStatus('error');
+    } else {
+      setStatus('success');
+      setEmail('');
+    }
+  };
 
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 mt-auto">
@@ -57,8 +79,34 @@ export default function Footer() {
                 <ul className="space-y-3 text-sm sm:text-base">
                   <li><Link to="/" className="hover:text-blue-400 transition-colors">{t('footer.quickLinks.home')}</Link></li>
                   <li><Link to="/about" className="hover:text-blue-400 transition-colors">{t('footer.quickLinks.aboutUs')}</Link></li>
+                  <li><Link to="/insights" className="hover:text-blue-400 transition-colors">{t('nav.insights')}</Link></li>
                   <li><Link to="/contact" className="hover:text-blue-400 transition-colors">{t('footer.quickLinks.contactUs')}</Link></li>
                 </ul>
+              </div>
+
+              <div>
+                <h3 className="text-white font-semibold mb-4">Newsletter</h3>
+                <p className="text-sm text-slate-400 mb-4">Subscribe to our weekly financial insights and market updates.</p>
+                <form className="flex flex-col gap-2" onSubmit={handleSubscribe}>
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={status === 'loading' || status === 'success'}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm disabled:opacity-50"
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={status === 'loading' || status === 'success'}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors text-sm flex items-center justify-center disabled:bg-blue-800"
+                  >
+                    {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : status === 'success' ? 'Subscribed!' : 'Subscribe'}
+                  </button>
+                  {status === 'error' && <p className="text-red-400 text-xs mt-1">Failed to subscribe. Please try again.</p>}
+                  {status === 'success' && <p className="text-emerald-400 text-xs mt-1">Welcome to the newsletter!</p>}
+                </form>
               </div>
 
               <div>

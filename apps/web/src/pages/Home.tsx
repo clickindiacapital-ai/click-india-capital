@@ -13,7 +13,6 @@ export default function Home() {
     { id: 'vehicle', icon: Car, titleKey: 'products.vehicle.title', descKey: 'products.vehicle.description', color: 'purple' },
   ];
 
-  const testimonials = t('home.testimonials', { returnObjects: true }) as Array<{name: string, role: string, quote: string}>;
 
   return (
     <div className="bg-white">
@@ -22,6 +21,7 @@ export default function Home() {
         className="w-full min-h-[60vh] md:aspect-[21/9] overflow-hidden relative flex flex-col justify-center bg-cover bg-center bg-no-repeat py-20"
         style={{ backgroundImage: "url('/hero-bg.png')" }}
       >
+        <div className="absolute inset-0 bg-white/70"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           {/* Vertically Centered Container */}
           <motion.div 
@@ -35,10 +35,10 @@ export default function Home() {
               {t('home.promo')}
             </div>
             
-            <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-widest uppercase mb-4 drop-shadow-sm whitespace-nowrap">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-widest uppercase mb-4 drop-shadow-sm sm:whitespace-nowrap leading-tight">
               {t('home.title1')}
             </h1>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-slate-900 drop-shadow-sm mb-6 leading-normal whitespace-nowrap pb-2">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 drop-shadow-sm mb-6 leading-tight sm:whitespace-nowrap pb-2">
               {t('home.title2')}
             </h2>
             <p className="text-2xl lg:text-3xl text-slate-800 font-bold mb-6 leading-relaxed drop-shadow-sm italic">
@@ -132,51 +132,14 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-3xl -translate-x-1/3 translate-y-1/2"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto mb-16"
-          >
-            <h2 className="text-4xl font-extrabold mb-4">{t('home.testimonialsTitle')}</h2>
-            <p className="text-lg text-slate-300">{t('home.testimonialsSubtitle')}</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials?.map((testimonial, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-slate-800/50 backdrop-blur-md p-8 rounded-3xl border border-slate-700/50"
-              >
-                <Quote className="w-10 h-10 text-blue-400 opacity-50 mb-6" />
-                <p className="text-slate-200 leading-relaxed mb-8 italic">"{testimonial.quote}"</p>
-                <div>
-                  <h4 className="font-bold text-white">{testimonial.name}</h4>
-                  <p className="text-sm text-slate-400">{testimonial.role}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Mobile Floating CTA */}
-      <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
+      <div className="md:hidden fixed bottom-4 left-20 right-20 z-40">
         <Link 
           to="/calculator"
-          className="flex w-full items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-full font-bold shadow-2xl shadow-blue-900/50"
+          className="flex w-full items-center justify-center gap-2 px-4 py-4 bg-blue-600 text-white rounded-2xl font-bold shadow-2xl shadow-blue-900/50"
         >
-          {t('home.floatingCta')}
+          <span className="truncate">{t('home.floatingCta')}</span>
           <ArrowRight className="w-5 h-5" />
         </Link>
       </div>

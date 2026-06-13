@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { submitToWeb3Forms } from '../utils/web3forms';
+
 export default function EligibilityCheck() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
@@ -24,16 +26,25 @@ export default function EligibilityCheck() {
     }
   }, [urlType]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (step < 3) {
       setStep(step + 1);
     } else {
       setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
+      
+      const formData = new FormData(e.currentTarget);
+      const data = Object.fromEntries(formData.entries());
+      data.loanType = loanType;
+      
+      const success = await submitToWeb3Forms(data, "Eligibility Application");
+      
+      setLoading(false);
+      if (success) {
         setApproved(true);
-      }, 1500);
+      } else {
+        alert("There was an error submitting your application. Please try again or contact us on WhatsApp.");
+      }
     }
   };
 
@@ -65,7 +76,7 @@ export default function EligibilityCheck() {
           <>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.employmentType')}</label>
-              <select className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
+              <select name="employmentType" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
                 <option value="">{t('eligibility.fields.selectEmployment')}</option>
                 <option value="salaried">{t('eligibility.fields.salaried')}</option>
                 <option value="self_employed">{t('eligibility.fields.selfEmployed')}</option>
@@ -73,11 +84,11 @@ export default function EligibilityCheck() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.netSalary')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="netSalary" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.companyName')}</label>
-              <input type="text" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="text" name="companyName" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
           </>
         );
@@ -86,15 +97,15 @@ export default function EligibilityCheck() {
           <>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.businessVintage')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="businessVintage" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.annualTurnover')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="annualTurnover" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.gstRegistered')}</label>
-              <select className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
+              <select name="gstRegistered" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
                 <option value="">{t('eligibility.fields.selectOption')}</option>
                 <option value="yes">{t('eligibility.fields.yes')}</option>
                 <option value="no">{t('eligibility.fields.no')}</option>
@@ -107,7 +118,7 @@ export default function EligibilityCheck() {
           <>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.vehicleType')}</label>
-              <select className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
+              <select name="vehicleType" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
                 <option value="">{t('eligibility.fields.selectType')}</option>
                 <option value="new">{t('eligibility.fields.newVehicle')}</option>
                 <option value="used">{t('eligibility.fields.usedVehicle')}</option>
@@ -115,11 +126,11 @@ export default function EligibilityCheck() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.onRoadPrice')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="onRoadPrice" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.desiredLoan')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="desiredLoan" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
           </>
         );
@@ -128,7 +139,7 @@ export default function EligibilityCheck() {
           <>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.propertyStatus')}</label>
-              <select className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
+              <select name="propertyStatus" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required>
                 <option value="">{t('eligibility.fields.selectStatus')}</option>
                 <option value="ready">{t('eligibility.fields.readyToMove')}</option>
                 <option value="under_construction">{t('eligibility.fields.underConstruction')}</option>
@@ -137,11 +148,11 @@ export default function EligibilityCheck() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.propertyValue')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="propertyValue" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.existingEmis')}</label>
-              <input type="number" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+              <input type="number" name="existingEmis" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
             </div>
           </>
         );
@@ -204,15 +215,15 @@ export default function EligibilityCheck() {
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.fullName')}</label>
-                <input type="text" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
+                <input type="text" name="fullName" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.mobile')}</label>
-                <input type="tel" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required pattern="[0-9]{10}" />
+                <input type="tel" name="mobile" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none" required pattern="[0-9]{10}" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">{t('eligibility.fields.pan')}</label>
-                <input type="text" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none uppercase" required pattern="[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}" />
+                <input type="text" name="pan" className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none uppercase" required pattern="[a-zA-Z]{5}[0-9]{4}[a-zA-Z]{1}" />
               </div>
               
               <div>

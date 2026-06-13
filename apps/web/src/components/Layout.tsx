@@ -1,17 +1,21 @@
-import { IndianRupee } from 'lucide-react';
+import { useState } from 'react';
+import { IndianRupee, Menu, X } from 'lucide-react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
 import Footer from './Footer';
+import ChatBot from './ChatBot';
+import WhatsAppWidget from './WhatsAppWidget';
 
 export default function Layout() {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const { t } = useTranslation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      <nav className={`fixed w-full z-50 transition-colors duration-300 border-b ${isHome ? 'bg-white/80 backdrop-blur-md border-slate-100' : 'bg-white border-slate-200 shadow-sm'}`}>
+    <div className="min-h-screen bg-slate-50 flex flex-col relative">
+      <nav className={`fixed w-full z-40 transition-colors duration-300 border-b ${isHome ? 'bg-white/80 backdrop-blur-md border-slate-100' : 'bg-white border-slate-200 shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link to="/" className="flex items-center gap-2">
@@ -20,6 +24,9 @@ export default function Layout() {
             </Link>
             <div className="hidden md:flex gap-8 items-center">
               <Link to="/" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.home')}</Link>
+              <Link to="/about" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.aboutUs')}</Link>
+              <Link to="/insights" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.insights')}</Link>
+              <Link to="/contact" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.contactUs')}</Link>
               
               {/* Products Dropdown */}
               <div className="relative group py-6 -my-6">
@@ -43,13 +50,52 @@ export default function Layout() {
                 {t('nav.applyNow')}
               </Link>
             </div>
+            
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center gap-4">
+              <LanguageSelector />
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-slate-600 hover:text-blue-600 focus:outline-none"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-b border-slate-200 shadow-lg absolute w-full">
+            <div className="px-4 pt-2 pb-6 flex flex-col gap-4">
+              <Link to="/" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">{t('nav.home')}</Link>
+              <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">{t('nav.aboutUs')}</Link>
+              <Link to="/insights" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">{t('nav.insights')}</Link>
+              <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-700 font-medium py-2 border-b border-slate-50">{t('nav.contactUs')}</Link>
+              
+              <div className="py-2 border-b border-slate-50">
+                <span className="text-slate-900 font-bold mb-2 block">{t('nav.productsAndServices')}</span>
+                <div className="flex flex-col gap-3 pl-4">
+                  <Link to="/products?type=vehicle" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.vehicleLoans')}</Link>
+                  <Link to="/products?type=personal" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.personalLoans')}</Link>
+                  <Link to="/products?type=business" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.businessLoans')}</Link>
+                  <Link to="/products?type=home" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.homeLoans')}</Link>
+                </div>
+              </div>
+              
+              <Link to="/eligibility" onClick={() => setIsMobileMenuOpen(false)} className="bg-blue-600 text-center text-white px-6 py-3 rounded-xl font-medium mt-2 shadow-md">
+                {t('nav.applyNow')}
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
       <main className="flex-1 pt-20">
         <Outlet />
       </main>
       <Footer />
+      <ChatBot />
+      <WhatsAppWidget />
     </div>
   );
 }
