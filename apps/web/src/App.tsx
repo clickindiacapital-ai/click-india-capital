@@ -8,6 +8,8 @@ import About from './pages/About';
 import Insights from './pages/Insights';
 import InsightDetail from './pages/InsightDetail';
 import Contact from './pages/Contact';
+import Legal from './pages/Legal';
+import Advisory from './pages/Advisory';
 
 export default function App() {
   return (
@@ -21,7 +23,16 @@ export default function App() {
         <Route path="insights" element={<Insights />} />
         <Route path="insights/:id" element={<InsightDetail />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="advisory" element={<Advisory />} />
         <Route path="assistant" element={<Home />} />
+        
+        {/* Legal Routes */}
+        <Route path="privacy" element={<Legal type="privacy" />} />
+        <Route path="terms" element={<Legal type="terms" />} />
+        <Route path="disclaimer" element={<Legal type="disclaimer" />} />
+        <Route path="consent" element={<Legal type="consent" />} />
+        <Route path="grievance" element={<Legal type="grievance" />} />
+        <Route path="data-deletion" element={<Legal type="data-deletion" />} />
       </Route>
     </Routes>
   );

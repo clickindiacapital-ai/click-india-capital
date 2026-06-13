@@ -42,6 +42,8 @@ export default function Layout() {
                     <Link to="/products?type=personal" className="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors">{t('nav.personalLoans')}</Link>
                     <Link to="/products?type=business" className="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors">{t('nav.businessLoans')}</Link>
                     <Link to="/products?type=home" className="block px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-xl transition-colors">{t('nav.homeLoans')}</Link>
+                    <div className="h-px bg-slate-100 my-1"></div>
+                    <Link to="/advisory" className="block px-4 py-2.5 text-sm font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-colors">{t('nav.advisory')}</Link>
                   </div>
                 </div>
               </div>
@@ -80,6 +82,8 @@ export default function Layout() {
                   <Link to="/products?type=personal" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.personalLoans')}</Link>
                   <Link to="/products?type=business" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.businessLoans')}</Link>
                   <Link to="/products?type=home" onClick={() => setIsMobileMenuOpen(false)} className="text-slate-600">{t('nav.homeLoans')}</Link>
+                  <div className="h-px bg-slate-100 my-1 w-full"></div>
+                  <Link to="/advisory" onClick={() => setIsMobileMenuOpen(false)} className="text-emerald-600 font-bold">{t('nav.advisory')}</Link>
                 </div>
               </div>
               

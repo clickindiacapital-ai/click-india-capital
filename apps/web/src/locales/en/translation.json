@@ -9,13 +9,14 @@
     "aboutUs": "About Us",
     "insights": "Knowledge Base",
     "contactUs": "Contact Us",
+    "advisory": "Advisory Services",
     "applyNow": "Apply Now"
   },
   "home": {
-    "promo": "✓ 50+ Trusted Lending Partners",
+    "promo": "✓ 25+ Years of Lending Experience",
     "title1": "CLICK INDIA CAPITAL",
     "title2": "Dream Big. Borrow Smart.",
-    "subtitle": "Unlocking Potential, Together.",
+    "subtitle": "Compare loan options, check eligibility instantly, and get expert guidance from a lending professional with over 25 years of experience.",
     "description": "Compare offers from leading lenders, check your eligibility instantly, and get expert assistance throughout your loan journey.",
     "checkEligibility": "See My Options",
     "calculateEmi": "Calculate EMI",
@@ -40,7 +41,67 @@
         "quote": "I thought getting a home loan would be stressful, but they made it easy. Lowest interest rates and zero hidden charges."
       }
     ],
-    "floatingCta": "Apply Now"
+    "floatingCta": "Apply Now",
+    "trustBar": {
+      "exp": "25+ Years Experience",
+      "pan": "Pan India Lending Expertise",
+      "partners": "Multiple Lending Partners",
+      "transparent": "100% Transparent Process"
+    },
+    "founder": {
+      "title": "Meet the Founder",
+      "name": "Sameer Krishnan",
+      "description": "Founder of Click India Capital with over 25 years of experience across banks, NBFCs, and retail lending institutions. Former Product Manager at ESAF Small Finance Bank with extensive background spanning Mahindra Finance, Volkswagen Finance, ICICI Bank, and HDFC Bank.",
+      "philosophy": "Our goal is not just to help you get a loan, but to act as your financial coach. We diagnose why you were rejected, structure your profile, and guide you towards financial stability.",
+      "tags": ["Founder-Led Guidance", "Transparent Advice", "Trusted Expertise"]
+    },
+    "consulting": {
+      "title": "Expert Financial Guidance",
+      "subtitle": "Stop guessing why your loan was rejected. Get a professional diagnosis and a concrete strategy from an industry insider.",
+      "whatsapp": {
+        "title": "WhatsApp Diagnosis",
+        "price": "₹49",
+        "desc": "Quick loan rejection diagnosis over WhatsApp.",
+        "btn": "Chat Now"
+      },
+      "call": {
+        "title": "Expert Guidance Call",
+        "price": "₹199",
+        "desc": "15-minute 1-on-1 voice or video consultation.",
+        "btn": "Book Call"
+      },
+      "blueprint": {
+        "title": "Loan Strategy Blueprint",
+        "price": "₹1,500",
+        "desc": "Comprehensive 1-hour session with a customized action plan.",
+        "btn": "Get Blueprint"
+      }
+    },
+    "readiness": {
+      "title": "Borrow Readiness Check",
+      "subtitle": "Answer 6 simple questions to get an instant, indicative assessment of your loan eligibility profile.",
+      "loanType": "Loan Type",
+      "monthlyIncome": "Monthly Net Income (₹)",
+      "employment": "Employment Type",
+      "existingEmi": "Total Existing Monthly EMIs (₹)",
+      "creditScore": "Estimated Credit Score",
+      "city": "City of Residence",
+      "btnCalculate": "Calculate Readiness",
+      "resultTitle": "Your Readiness Profile",
+      "scoreLabel": "Indicative Approval Chances:",
+      "high": "High",
+      "medium": "Fair",
+      "low": "Needs Improvement",
+      "disclaimer": "Results are indicative only. Final approval rests with lending institutions based on comprehensive credit policies.",
+      "ctaHigh": "Proceed to Application",
+      "ctaLow": "Fix Your Profile with Sameer"
+    },
+    "security": {
+      "title": "Bank-Grade Security",
+      "secure": "Secure Document Upload",
+      "encryption": "End-to-End Encryption",
+      "privacy": "Privacy Protected"
+    }
   },
   "emi": {
     "title": "EMI Calculator",
@@ -297,5 +358,34 @@
     "q_phone": "And finally, what is your 10-digit Mobile Number so our expert Sameer can contact you with your exact loan offers?",
     "success": "Thank you! 🎉 We have received your details. Our team will contact you shortly with your personalized offers.",
     "placeholder": "Type your message..."
+  },
+  "advisory": {
+    "title": "Financial Advisory & Diagnosis",
+    "subtitle": "Stop guessing why your loan was rejected. Get a professional diagnosis and a concrete strategy from an industry insider with over 25 years of experience.",
+    "problem": {
+      "title": "Why Are You Getting Rejected?",
+      "p1": "Banks and NBFCs use rigid algorithms. A single missed payment, multiple inquiries in a short time, or an unoptimized credit mix can trigger an automatic rejection.",
+      "p2": "Without an insider's perspective, applying repeatedly will only damage your CIBIL score further."
+    },
+    "solution": {
+      "title": "The Solution: Financial Coaching",
+      "p1": "As your Financial Coach, we diagnose the exact reason for your rejection. We don't just sell loans; we structure your profile to make you loan-ready.",
+      "p2": "Choose a consulting tier below to get started on your path to financial stability."
+    },
+    "process": {
+      "title": "How It Works",
+      "step1": {
+        "title": "Book a Session",
+        "desc": "Choose the consulting tier that fits your needs and schedule a time."
+      },
+      "step2": {
+        "title": "Deep Diagnosis",
+        "desc": "We analyze your credit report, income statements, and past rejections."
+      },
+      "step3": {
+        "title": "Action Plan",
+        "desc": "Receive a concrete, step-by-step blueprint to fix your profile and secure funding."
+      }
+    }
   }
 }

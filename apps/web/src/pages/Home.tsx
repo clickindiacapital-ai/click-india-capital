@@ -1,7 +1,10 @@
-import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Car, Briefcase, UserCircle, Home as HomeIcon, Quote } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Car, Briefcase, UserCircle, Home as HomeIcon, Quote, Lock, FileKey } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import BorrowReadiness from '../components/BorrowReadiness';
+import ConsultingPricing from '../components/ConsultingPricing';
+import FounderSection from '../components/FounderSection';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -55,6 +58,26 @@ export default function Home() {
               </Link>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Trust Bar */}
+      <section className="bg-slate-900 py-8 relative z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-slate-700/50">
+            <div className="px-4 text-center">
+              <div className="text-emerald-400 font-bold mb-1">{t('home.trustBar.exp')}</div>
+            </div>
+            <div className="px-4 text-center">
+              <div className="text-emerald-400 font-bold mb-1">{t('home.trustBar.pan')}</div>
+            </div>
+            <div className="px-4 text-center">
+              <div className="text-emerald-400 font-bold mb-1">{t('home.trustBar.partners')}</div>
+            </div>
+            <div className="px-4 text-center">
+              <div className="text-emerald-400 font-bold mb-1">{t('home.trustBar.transparent')}</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -132,6 +155,43 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Founder Section */}
+      <FounderSection />
+
+      {/* Borrow Readiness Section */}
+      <section className="py-24 bg-slate-50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-100/50 -skew-x-12 transform translate-x-20"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <BorrowReadiness />
+        </div>
+      </section>
+
+      {/* Consulting Pricing Section */}
+      <ConsultingPricing />
+
+      {/* Security Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-100 rounded-full mb-6">
+            <ShieldCheck className="w-8 h-8 text-slate-800" />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-12">{t('home.security.title')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center">
+              <FileKey className="w-10 h-10 text-emerald-500 mb-4" />
+              <h3 className="font-bold text-slate-800">{t('home.security.secure')}</h3>
+            </div>
+            <div className="flex flex-col items-center">
+              <Lock className="w-10 h-10 text-emerald-500 mb-4" />
+              <h3 className="font-bold text-slate-800">{t('home.security.encryption')}</h3>
+            </div>
+            <div className="flex flex-col items-center">
+              <ShieldCheck className="w-10 h-10 text-emerald-500 mb-4" />
+              <h3 className="font-bold text-slate-800">{t('home.security.privacy')}</h3>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Mobile Floating CTA */}
       <div className="md:hidden fixed bottom-4 left-20 right-20 z-40">

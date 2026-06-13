@@ -215,6 +215,30 @@ export default function LoanProducts() {
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* Advisory Services Banner */}
+        <div className="mt-16 bg-gradient-to-r from-emerald-900 to-emerald-700 rounded-[2.5rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-3xl translate-x-1/3 -translate-y-1/4"></div>
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-800 border border-emerald-600 text-emerald-200 font-bold text-sm mb-6">
+                <Sparkles className="w-4 h-4" />
+                Premium Coaching
+              </div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Financial Advisory & Diagnosis</h2>
+              <p className="text-emerald-100 text-lg leading-relaxed mb-8 max-w-2xl">
+                Stop guessing why your loan was rejected. Get a professional diagnosis and a concrete strategy from an industry insider with over 25 years of experience.
+              </p>
+              <Link to="/advisory" className="inline-flex items-center gap-2 bg-white text-emerald-900 hover:bg-emerald-50 px-8 py-4 rounded-full font-bold transition-all shadow-xl">
+                View Consulting Packages <ArrowRight className="w-5 h-5" />
+              </Link>
+            </div>
+            <div className="hidden md:flex w-48 h-48 bg-emerald-800 rounded-full items-center justify-center border-4 border-emerald-600/50 shadow-2xl shrink-0">
+              <UserCircle className="w-24 h-24 text-emerald-300" />
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
