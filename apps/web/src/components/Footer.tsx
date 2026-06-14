@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShieldCheck, HeartHandshake, CheckCircle2, Headset, Loader2 } from 'lucide-react';
+import { ShieldCheck, HeartHandshake, CheckCircle2, Headset, Loader2, Instagram } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { supabase } from '../utils/supabase';
@@ -70,6 +70,17 @@ export default function Footer() {
             <p className="text-slate-400 leading-relaxed mb-6">
               {t('footer.about')}
             </p>
+            <div className="flex items-center gap-4">
+              <a 
+                href="https://instagram.com/clickindiacapital" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white text-slate-400 transition-all shadow-sm"
+                aria-label="Follow us on Instagram"
+              >
+                <Instagram className="w-5 h-5" />
+              </a>
+            </div>
           </div>
 
           <div className="md:col-span-12 lg:col-span-7 lg:col-start-6">
