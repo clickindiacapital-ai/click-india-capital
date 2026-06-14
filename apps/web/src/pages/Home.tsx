@@ -24,7 +24,7 @@ export default function Home() {
         className="w-full min-h-[60vh] md:aspect-[21/9] overflow-hidden relative flex flex-col justify-center bg-cover bg-center bg-no-repeat py-20"
         style={{ backgroundImage: "url('/hero-bg.png')" }}
       >
-        <div className="absolute inset-0 bg-white/70"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           {/* Vertically Centered Container */}
           <motion.div 
@@ -38,16 +38,16 @@ export default function Home() {
               {t('home.promo')}
             </div>
             
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-widest uppercase mb-4 drop-shadow-sm sm:whitespace-nowrap leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-widest uppercase mb-4 drop-shadow-md sm:whitespace-nowrap leading-tight">
               {t('home.title1')}
             </h1>
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 drop-shadow-sm mb-6 leading-tight sm:whitespace-nowrap pb-2">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white drop-shadow-md mb-6 leading-tight sm:whitespace-nowrap pb-2">
               {t('home.title2')}
             </h2>
-            <p className="text-2xl lg:text-3xl text-slate-800 font-bold mb-6 leading-relaxed drop-shadow-sm italic">
+            <p className="text-2xl lg:text-3xl text-emerald-300 font-bold mb-6 leading-relaxed drop-shadow-md italic">
               {t('home.subtitle')}
             </p>
-            <p className="text-lg lg:text-xl text-slate-800 font-semibold mb-10 leading-relaxed drop-shadow-sm max-w-2xl mx-auto">
+            <p className="text-lg lg:text-xl text-slate-100 font-semibold mb-10 leading-relaxed drop-shadow-md max-w-2xl mx-auto">
               {t('home.description')}
             </p>
             
