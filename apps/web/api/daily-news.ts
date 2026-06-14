@@ -1,4 +1,3 @@
-import { schedule } from '@netlify/functions';
 import Parser from 'rss-parser';
 import { createClient } from '@supabase/supabase-js';
 
@@ -8,8 +7,12 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const parser = new Parser();
 
-// Run every day at 6:00 AM IST (which is 00:30 UTC)
-export const handler = schedule('30 0 * * *', async (event) => {
+export default async function handler(req: any, res: any) {
+  // Ensure this is only accessible via authorized methods (Vercel cron sends a specific header, though we can skip strict auth for now since it's just fetching public news)
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
     console.log("Fetching daily financial news...");
     
@@ -36,15 +39,9 @@ export const handler = schedule('30 0 * * *', async (event) => {
     
     console.log(`Successfully processed ${insightsToInsert.length} news items.`);
     
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Daily news updated successfully" })
-    };
+    return res.status(200).json({ message: "Daily news updated successfully" });
   } catch (error) {
     console.error("Failed to fetch daily news:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Failed to process news" })
-    };
+    return res.status(500).json({ error: "Failed to process news" });
   }
-});
+}

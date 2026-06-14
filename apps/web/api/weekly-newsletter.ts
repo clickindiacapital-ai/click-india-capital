@@ -1,4 +1,3 @@
-import { schedule } from '@netlify/functions';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 
@@ -7,8 +6,11 @@ const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Run every Friday at 9:00 AM IST (which is 03:30 UTC)
-export const handler = schedule('30 3 * * 5', async (event) => {
+export default async function handler(req: any, res: any) {
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
     console.log("Starting weekly newsletter blast...");
 
@@ -20,7 +22,7 @@ export const handler = schedule('30 3 * * 5', async (event) => {
     if (subError) throw subError;
     if (!subscribers || subscribers.length === 0) {
       console.log("No subscribers found. Exiting.");
-      return { statusCode: 200, body: "No subscribers." };
+      return res.status(200).json({ message: "No subscribers." });
     }
 
     // 2. Fetch the top news from the last 7 days
@@ -62,15 +64,13 @@ export const handler = schedule('30 3 * * 5', async (event) => {
       </div>
     `;
 
-    // 3. Send emails using Resend (using batch sending if needed, or loop)
-    // Note: Free Resend accounts require a verified domain. Assuming domain is verified on Resend.
+    // 3. Send emails using Resend
     const emailsToSend = subscribers.map(sub => sub.email);
     
-    // For large lists, you should batch these, but for a new agency this array approach works with Resend's batch API
     const batchData = emailsToSend.map(email => ({
-      from: 'Insights <insights@clickindiacapital.in>', // User must verify this domain in Resend
+      from: 'Insights <insights@clickindiacapital.in>', 
       to: [email],
-      subject: 'Your Weekly Financial Insights 📈',
+      subject: 'Your Weekly Financial Insights',
       html: emailHtml,
     }));
 
@@ -78,15 +78,9 @@ export const handler = schedule('30 3 * * 5', async (event) => {
 
     console.log(`Successfully sent newsletter to ${emailsToSend.length} subscribers.`);
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ message: "Newsletter sent successfully" })
-    };
+    return res.status(200).json({ message: "Newsletter sent successfully" });
   } catch (error) {
     console.error("Failed to send weekly newsletter:", error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Failed to send newsletter" })
-    };
+    return res.status(500).json({ error: "Failed to send newsletter" });
   }
-});
+}
