@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
+import SEO from './components/SEO';
 import Home from './pages/Home';
 import EligibilityCheck from './pages/EligibilityCheck';
 import EmiCalculator from './pages/EmiCalculator';
@@ -13,7 +15,9 @@ import Advisory from './pages/Advisory';
 
 export default function App() {
   return (
-    <Routes>
+    <HelmetProvider>
+      <SEO />
+      <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="eligibility" element={<EligibilityCheck />} />
@@ -34,6 +38,7 @@ export default function App() {
         <Route path="grievance" element={<Legal type="grievance" />} />
         <Route path="data-deletion" element={<Legal type="data-deletion" />} />
       </Route>
-    </Routes>
+      </Routes>
+    </HelmetProvider>
   );
 }
