@@ -58,7 +58,7 @@ export default function ConsultingPricing() {
             <h3 className="text-2xl font-bold mb-2">{t('home.consulting.blueprint.title')}</h3>
             <div className="text-3xl font-extrabold text-purple-400 mb-4">{t('home.consulting.blueprint.price')}</div>
             <p className="text-slate-400 mb-8 flex-grow">{t('home.consulting.blueprint.desc')}</p>
-            <a href="https://topmate.io/clickindiacapital" target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-slate-700 hover:bg-purple-600 text-white font-bold rounded-xl transition-colors text-center">
+            <a href="https://topmate.io/clickindiacapital/2156100" target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-slate-700 hover:bg-purple-600 text-white font-bold rounded-xl transition-colors text-center">
               {t('home.consulting.blueprint.btn')}
             </a>
           </motion.div>
