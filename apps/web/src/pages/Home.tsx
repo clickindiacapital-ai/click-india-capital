@@ -155,6 +155,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Consulting Pricing Section */}
+      <ConsultingPricing />
+
       {/* Founder Section */}
       <FounderSection />
 
@@ -166,8 +169,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Consulting Pricing Section */}
-      <ConsultingPricing />
 
       {/* Security Section */}
       <section className="py-20 bg-white">
