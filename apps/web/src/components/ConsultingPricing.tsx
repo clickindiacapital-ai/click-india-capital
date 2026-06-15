@@ -42,7 +42,7 @@ export default function ConsultingPricing() {
             <h3 className="text-2xl font-bold mb-2">{t('home.consulting.call.title')}</h3>
             <div className="text-3xl font-extrabold text-white mb-4">{t('home.consulting.call.price')}</div>
             <p className="text-blue-200 mb-8 flex-grow">{t('home.consulting.call.desc')}</p>
-            <a href="https://topmate.io/clickindiacapital" target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-white text-blue-900 hover:bg-blue-50 font-bold rounded-xl transition-colors text-center">
+            <a href="https://topmate.io/clickindiacapital/2155985" target="_blank" rel="noopener noreferrer" className="w-full py-4 bg-white text-blue-900 hover:bg-blue-50 font-bold rounded-xl transition-colors text-center">
               {t('home.consulting.call.btn')}
             </a>
           </motion.div>
