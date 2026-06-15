@@ -1,7 +1,31 @@
-import { LayoutDashboard, Users, FileText, Settings, Bell, Search } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Bell, Search, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import CRMLogin from './components/CRMLogin';
+import supabase from './services/supabaseClient';
 
 export default function App() {
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!session) {
+    return <CRMLogin onAuthenticated={() => {}} />;
+  }
+
   return (
+
     <div className="min-h-screen bg-slate-50 flex">
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col">

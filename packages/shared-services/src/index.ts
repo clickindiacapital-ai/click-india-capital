@@ -1,1 +1,2 @@
-export const hello = "world";
+export * from './supabase';
+export * from './dummy';
