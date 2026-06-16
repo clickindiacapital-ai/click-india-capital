@@ -7,10 +7,7 @@ export default function WhatsAppWidget() {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const phoneNumber = "919995959055";
-  const defaultMessage = "Hi Click India Capital! I need some help regarding loan advisory.";
-
-  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
+  const whatsappUrl = `https://topmate.io/clickindiacapital/2155338`;
 
   useEffect(() => {
     // Show tooltip after 5 seconds to grab attention
@@ -22,7 +19,7 @@ export default function WhatsAppWidget() {
   }, []);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start">
       <AnimatePresence>
         {showTooltip && !isOpen && (
           <motion.div
@@ -39,7 +36,7 @@ export default function WhatsAppWidget() {
             >
               Chat with Sameer
             </button>
-            <div className="absolute -bottom-2 right-6 w-4 h-4 bg-white border-b border-r border-slate-100 transform rotate-45"></div>
+            <div className="absolute -bottom-2 left-6 w-4 h-4 bg-white border-b border-r border-slate-100 transform rotate-45"></div>
           </motion.div>
         )}
       </AnimatePresence>
