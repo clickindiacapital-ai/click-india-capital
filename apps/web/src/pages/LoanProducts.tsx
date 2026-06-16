@@ -223,7 +223,7 @@ export default function LoanProducts() {
             <div className="flex-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-800 border border-emerald-600 text-emerald-200 font-bold text-sm mb-6">
                 <Sparkles className="w-4 h-4" />
-                Premium Coaching
+                Founder-Led Advisory
               </div>
               <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">Financial Advisory & Diagnosis</h2>
               <p className="text-emerald-100 text-lg leading-relaxed mb-8 max-w-2xl">

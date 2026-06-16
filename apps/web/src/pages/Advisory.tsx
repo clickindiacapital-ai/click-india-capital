@@ -23,7 +23,7 @@ export default function Advisory() {
             animate={{ opacity: 1, y: 0 }}
             className="inline-block mb-4 px-4 py-1.5 bg-emerald-500/20 border border-emerald-500/30 rounded-full text-emerald-300 font-medium tracking-wide text-sm"
           >
-            Premium Coaching
+            Founder-Led Advisory
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
