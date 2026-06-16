@@ -7,26 +7,24 @@ interface CRMLoginProps {
 
 const CRMLogin: React.FC<CRMLoginProps> = ({ onAuthenticated }) => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
-  const handleMagicLink = async (e: React.FormEvent) => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
+      password,
     });
 
     if (error) {
       setError(error.message);
     } else {
-      setSent(true);
+      onAuthenticated();
     }
     setLoading(false);
   };
@@ -46,16 +44,14 @@ const CRMLogin: React.FC<CRMLoginProps> = ({ onAuthenticated }) => {
         </div>
 
         <div className="bg-[#0A111F] border border-white/5 rounded-[32px] p-10">
-          {!sent ? (
-            <>
-              <div className="mb-8">
-                <h2 className="text-2xl font-black tracking-tighter text-white mb-2">Admin Access</h2>
-                <p className="text-sm text-gray-500 font-medium">
-                  Enter your admin email. We'll send a secure magic link — no password needed.
-                </p>
-              </div>
+          <div className="mb-8">
+            <h2 className="text-2xl font-black tracking-tighter text-white mb-2">Admin Access</h2>
+            <p className="text-sm text-gray-500 font-medium">
+              Enter your credentials to access the secure CRM.
+            </p>
+          </div>
 
-              <form onSubmit={handleMagicLink} className="space-y-6">
+          <form onSubmit={handlePasswordLogin} className="space-y-6">
                 <div>
                   <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">
                     Admin Email
@@ -70,6 +66,20 @@ const CRMLogin: React.FC<CRMLoginProps> = ({ onAuthenticated }) => {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white font-medium outline-none focus:border-blue-600 transition-all placeholder:text-gray-700"
+                  />
+                </div>
+
                 {error && (
                   <div className="px-5 py-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
                     <p className="text-xs font-bold text-red-400">{error}</p>
@@ -78,33 +88,12 @@ const CRMLogin: React.FC<CRMLoginProps> = ({ onAuthenticated }) => {
 
                 <button
                   type="submit"
-                  disabled={loading || !email}
+                  disabled={loading || !email || !password}
                   className="w-full py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-black text-sm uppercase tracking-widest rounded-2xl transition-all shadow-lg shadow-blue-900/40"
                 >
-                  {loading ? 'Sending...' : 'Send Magic Link'}
+                  {loading ? 'Authenticating...' : 'Secure Login'}
                 </button>
               </form>
-            </>
-          ) : (
-            <div className="text-center py-6">
-              <div className="w-16 h-16 bg-emerald-500/10 rounded-[24px] flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-black text-white mb-3">Check your inbox</h3>
-              <p className="text-sm text-gray-500 font-medium leading-relaxed">
-                Magic link sent to <span className="text-blue-400 font-bold">{email}</span>.
-                <br />Click the link to access the dashboard.
-              </p>
-              <button
-                onClick={() => setSent(false)}
-                className="mt-8 text-xs font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors"
-              >
-                ← Use a different email
-              </button>
-            </div>
-          )}
         </div>
 
         <p className="text-center text-[10px] text-gray-700 font-bold uppercase tracking-widest mt-8">

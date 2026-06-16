@@ -1,8 +1,9 @@
-export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal_sent' | 'won' | 'lost';
+export type LeadStatus = 'NEW' | 'CONTACTED' | 'ELIGIBILITY_ASSESSED' | 'DOCUMENTS_PENDING' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'DISBURSED';
 
 export interface Lead {
   id: string;
   created_at: string;
+  customer_id?: string;
   name: string;
   email: string;
   phone: string;
@@ -11,22 +12,8 @@ export interface Lead {
   loan_amount?: number;
   message?: string;
   status: LeadStatus;
-  source: string; // e.g., 'website_contact', 'whatsapp_widget', 'eligibility_calculator'
-}
-
-export type ConsultingServiceType = 'whatsapp_diagnosis' | 'expert_call' | 'loan_blueprint';
-
-export interface ConsultingSession {
-  id: string;
-  created_at: string;
-  client_name: string;
-  client_email: string;
-  service_type: ConsultingServiceType;
-  topmate_booking_id?: string;
-  amount_paid: number;
-  status: 'pending' | 'completed' | 'cancelled';
-  scheduled_for?: string;
-  notes?: string;
+  source: string;
+  urgent_action_required?: boolean;
 }
 
 export interface Customer {
@@ -35,11 +22,102 @@ export interface Customer {
   name: string;
   email: string;
   phone: string;
+  whatsapp?: string;
+  dob?: string;
+  city?: string;
+  state?: string;
+  employment_type?: string;
+  employer_name?: string;
+  designation?: string;
+  experience_years?: number;
+  industry?: string;
+  monthly_income?: number;
+  emi_obligations?: number;
+  credit_score?: number;
+  existing_loans_count?: number;
+  credit_card_outstanding?: number;
+  primary_goal?: string;
+  tags?: string[];
+  borrow_readiness_score?: number;
+  loan_health_metrics?: {
+    income_stability: number;
+    credit_behaviour: number;
+    emi_burden: number;
+    documentation: number;
+  };
   total_loans_disbursed: number;
   active_loans: number;
   lifetime_value: number;
   last_contact_date?: string;
 }
+
+export interface Consultation {
+  id: string;
+  created_at: string;
+  customer_id?: string;
+  type: 'WHATSAPP_49' | 'VOICE_VIDEO_199' | 'BLUEPRINT_1500';
+  amount_paid: number;
+  status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+  scheduled_for?: string;
+  duration_minutes?: number;
+  notes?: string;
+  recommendations?: string;
+  follow_up_action?: string;
+  outcome?: string;
+}
+
+export interface CustomerTimelineEvent {
+  id: string;
+  customer_id: string;
+  event_date: string;
+  event_type: string;
+  description: string;
+  metadata?: any;
+}
+
+export interface CustomerDocument {
+  id: string;
+  customer_id: string;
+  document_type: string;
+  file_url?: string;
+  status: 'UPLOADED' | 'PENDING' | 'EXPIRED';
+  uploaded_at?: string;
+}
+
+export interface LoanRejection {
+  id: string;
+  customer_id: string;
+  lead_id?: string;
+  rejection_date?: string;
+  reason_category: string;
+  suggested_actions?: string;
+  alternative_products?: string;
+  alternative_lenders?: string;
+}
+
+export interface Referral {
+  id: string;
+  referrer_id: string;
+  referred_id?: string;
+  created_at: string;
+  revenue_generated?: number;
+  status: string;
+}
+
+export interface CustomerMessage {
+  id: string;
+  created_at: string;
+  customer_id?: string;
+  lead_id?: string;
+  sender_id: string;
+  sender_type: 'CUSTOMER' | 'AGENT' | 'AI_AGENT';
+  content: string;
+  message_type: 'TEXT' | 'DOCUMENT' | 'IMAGE';
+  message_priority: 'NORMAL' | 'URGENT' | 'EMERGENCY';
+  is_read: boolean;
+}
+
+export type LeadData = Lead;
 
 export interface Database {
   public: {
@@ -49,15 +127,40 @@ export interface Database {
         Insert: Omit<Lead, 'id' | 'created_at'>;
         Update: Partial<Omit<Lead, 'id' | 'created_at'>>;
       };
-      consulting_sessions: {
-        Row: ConsultingSession;
-        Insert: Omit<ConsultingSession, 'id' | 'created_at'>;
-        Update: Partial<Omit<ConsultingSession, 'id' | 'created_at'>>;
-      };
       customers: {
         Row: Customer;
         Insert: Omit<Customer, 'id' | 'created_at'>;
         Update: Partial<Omit<Customer, 'id' | 'created_at'>>;
+      };
+      consultations: {
+        Row: Consultation;
+        Insert: Omit<Consultation, 'id' | 'created_at'>;
+        Update: Partial<Omit<Consultation, 'id' | 'created_at'>>;
+      };
+      customer_timeline: {
+        Row: CustomerTimelineEvent;
+        Insert: Omit<CustomerTimelineEvent, 'id'>;
+        Update: Partial<Omit<CustomerTimelineEvent, 'id'>>;
+      };
+      customer_documents: {
+        Row: CustomerDocument;
+        Insert: Omit<CustomerDocument, 'id'>;
+        Update: Partial<Omit<CustomerDocument, 'id'>>;
+      };
+      loan_rejections: {
+        Row: LoanRejection;
+        Insert: Omit<LoanRejection, 'id'>;
+        Update: Partial<Omit<LoanRejection, 'id'>>;
+      };
+      referrals: {
+        Row: Referral;
+        Insert: Omit<Referral, 'id' | 'created_at'>;
+        Update: Partial<Omit<Referral, 'id' | 'created_at'>>;
+      };
+      customer_messages: {
+        Row: CustomerMessage;
+        Insert: Omit<CustomerMessage, 'id' | 'created_at'>;
+        Update: Partial<Omit<CustomerMessage, 'id' | 'created_at'>>;
       };
     };
   };

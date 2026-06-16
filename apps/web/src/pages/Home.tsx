@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Car, Briefcase, UserCircle, Home as HomeIcon, Quote, Lock, FileKey } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Zap, Car, Briefcase, UserCircle, Home as HomeIcon, Lock, FileKey, Target, FileSearch, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -157,6 +157,48 @@ export default function Home() {
 
       {/* Consulting Pricing Section */}
       <ConsultingPricing />
+
+      {/* Why Choose Us Section */}
+      <section className="py-24 bg-white border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl font-extrabold text-slate-900 mb-4">Why Choose Click India Capital?</h2>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+            {[
+              { title: '25+ Years Experience', icon: Target },
+              { title: 'Founder-Led Guidance', icon: UserCircle },
+              { title: 'Transparent Process', icon: FileSearch },
+              { title: 'Multiple Loan Options', icon: Briefcase },
+              { title: 'Secure Document Handling', icon: ShieldCheck },
+              { title: 'Personalized Support', icon: HelpCircle },
+            ].map((feature, i) => (
+              <div key={i} className="flex flex-col items-center text-center p-6 rounded-3xl bg-slate-50 hover:bg-blue-50 transition-colors border border-slate-100">
+                <feature.icon className="w-10 h-10 text-blue-600 mb-4" />
+                <h3 className="font-bold text-slate-800">{feature.title}</h3>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Loan Rejected Section */}
+      <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-1/2 h-full bg-red-600/10 -skew-x-12 transform -translate-x-20"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-6">
+            <ShieldCheck className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-6">Loan Rejected?<br/><span className="text-red-400">Don't Lose Hope.</span></h2>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto mb-10">
+            Get your profile reviewed by an expert with over 25 years of lending experience. Understand why your loan was rejected, what can be improved, and explore alternative options available.
+          </p>
+          <Link to="/calculator" className="inline-flex items-center gap-2 px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-lg transition-all shadow-xl shadow-red-900/50">
+            Get Expert Review
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
 
       {/* Founder Section */}
       <FounderSection />

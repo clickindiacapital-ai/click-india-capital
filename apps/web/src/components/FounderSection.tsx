@@ -39,6 +39,29 @@ export default function FounderSection() {
             <p className="text-lg text-slate-700 leading-relaxed mb-6">
               {t('home.founder.description')}
             </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+              <div>
+                <h4 className="font-bold text-slate-900 mb-2">Expertise includes:</h4>
+                <ul className="space-y-1">
+                  {['Retail Lending', 'Vehicle Finance', 'Product Management', 'Collections', 'Digital Lending', 'Loan Portfolio Management'].map((item, i) => (
+                    <li key={i} className="text-sm text-slate-600 flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-blue-500" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 mb-2">Worked with:</h4>
+                <ul className="space-y-1">
+                  {['ESAF Small Finance Bank', 'Mahindra Finance', 'Volkswagen Finance', 'ICICI Bank', 'HDFC Bank', 'GE Money'].map((item, i) => (
+                    <li key={i} className="text-sm text-slate-600 flex items-center gap-2">
+                      <span className="w-1 h-1 rounded-full bg-slate-400" /> {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
             
             <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-2xl mb-8">
               <p className="text-blue-900 font-medium italic">

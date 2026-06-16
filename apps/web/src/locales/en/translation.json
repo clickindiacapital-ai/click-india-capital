@@ -13,13 +13,13 @@
     "applyNow": "Apply Now"
   },
   "home": {
-    "promo": "✓ 25+ Years of Lending Experience",
-    "title1": "CLICK INDIA CAPITAL",
-    "title2": "Dream Big. Borrow Smart.",
+    "promo": "✓ Founder-Led Loan Advisory",
+    "title1": "Find the Right Loan",
+    "title2": "For Every Dream",
     "subtitle": "Compare loan options, check eligibility instantly, and get expert guidance from a lending professional with over 25 years of experience.",
-    "description": "Compare offers from leading lenders, check your eligibility instantly, and get expert assistance throughout your loan journey.",
-    "checkEligibility": "See My Options",
-    "calculateEmi": "Calculate EMI",
+    "description": "Get your profile reviewed by an expert. Understand why loans get rejected, what can be improved, and find the best alternative options.",
+    "checkEligibility": "Check Borrow Readiness",
+    "calculateEmi": "Get Expert Review",
     "productsTitle": "Our Loan Solutions",
     "productsSubtitle": "Tailored financial products to meet your unique needs.",
     "testimonialsTitle": "Success Stories",
@@ -28,17 +28,17 @@
       {
         "name": "Rajesh Kumar",
         "role": "Small Business Owner",
-        "quote": "Click India Capital helped me secure a business loan in just 48 hours. Their process is incredibly fast and transparent."
+        "quote": "Click India Capital helped me understand exactly what my business needed. The transparent guidance and expert advice made the entire process incredibly smooth."
       },
       {
         "name": "Priya Sharma",
         "role": "Software Engineer",
-        "quote": "The entire process of getting my new car loan was seamless. The relationship manager was extremely helpful."
+        "quote": "The entire process was seamless. I received personalized support and clear explanations for every step of my loan journey."
       },
       {
         "name": "Amit Patel",
         "role": "First-time Homebuyer",
-        "quote": "I thought getting a home loan would be stressful, but they made it easy. Lowest interest rates and zero hidden charges."
+        "quote": "I thought getting a home loan would be stressful, but Sameer's expert advice made it easy. Honest guidance without any hidden surprises."
       }
     ],
     "floatingCta": "Apply Now",
@@ -56,24 +56,24 @@
       "tags": ["Founder-Led Guidance", "Transparent Advice", "Trusted Expertise"]
     },
     "consulting": {
-      "title": "Expert Financial Guidance",
+      "title": "Expert Loan Guidance",
       "subtitle": "Stop guessing why your loan was rejected. Get a professional diagnosis and a concrete strategy from an industry insider.",
       "whatsapp": {
-        "title": "WhatsApp Diagnosis",
+        "title": "WhatsApp Consultation",
         "price": "₹49",
-        "desc": "Quick loan rejection diagnosis over WhatsApp.",
+        "desc": "Quick loan eligibility and rejection diagnosis over WhatsApp.",
         "btn": "Chat Now"
       },
       "call": {
-        "title": "Expert Guidance Call",
+        "title": "Voice or Video Consultation",
         "price": "₹199",
-        "desc": "15-minute 1-on-1 voice or video consultation.",
+        "desc": "Book a 1-on-1 consultation with the founder and get expert guidance backed by years of experience in retail lending.",
         "btn": "Book Call"
       },
       "blueprint": {
         "title": "Loan Strategy Blueprint",
         "price": "₹1,500",
-        "desc": "Comprehensive 1-hour session with a customized action plan.",
+        "desc": "Comprehensive 1-hour consultation with a personalized loan action plan.",
         "btn": "Get Blueprint"
       }
     },
@@ -154,7 +154,8 @@
       "grievance": "Grievance Redressal",
       "dataDeletion": "Data Deletion Request"
     },
-    "copyright": "© 2026 Click India Capital. All Rights Reserved."
+    "copyright": "© 2026 Click India Capital. All Rights Reserved.",
+    "disclaimer": "Click India Capital is a loan facilitation and comparison platform and does not directly provide loans, accept deposits, or make credit decisions. Loan approvals, interest rates, processing fees, loan amounts, and other terms are determined solely by the respective lending institutions and are subject to their policies and eligibility criteria. Submission of an application does not guarantee loan approval."
   },
   "eligibility": {
     "title": "Check Your Eligibility",

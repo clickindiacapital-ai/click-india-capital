@@ -143,7 +143,7 @@ export default function Footer() {
 
         <div className="text-center text-slate-500 text-sm max-w-4xl mx-auto space-y-4">
           <p className="text-xs border-b border-slate-800 pb-4 mb-4">
-            <strong>Disclaimer:</strong> Click India Capital is a loan facilitation, advisory, and comparison platform and does not directly provide loans, accept deposits, or make credit decisions. Loan approvals, interest rates, processing fees, loan amounts, and other terms are determined solely by the respective lending institutions and are subject to their policies and eligibility criteria. Submission of an application or utilizing our advisory services does not guarantee loan approval. We provide guidance to improve credit profiles, but we do not provide legal debt settlement services.
+            <strong>Disclaimer:</strong> {t('footer.disclaimer')}
           </p>
           <p>{t('footer.copyright')}</p>
         </div>

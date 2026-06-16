@@ -12,4 +12,7 @@ export default defineConfig({
   server: {
     port: 5181,
   },
+  optimizeDeps: {
+    include: ['@supabase/supabase-js']
+  }
 });

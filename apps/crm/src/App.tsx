@@ -1,10 +1,18 @@
-import { LayoutDashboard, Users, FileText, Settings, Bell, Search, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Bell, Search, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CRMLogin from './components/CRMLogin';
+import CommunicationCenter from './pages/CommunicationCenter';
+import IntelligenceConsole from './components/IntelligenceConsole';
+import Customers from './pages/Customers';
+import CustomerProfile from './pages/CustomerProfile';
+import LoanApplications from './pages/LoanApplications';
+import SettingsPage from './pages/Settings';
 import supabase from './services/supabaseClient';
 
 export default function App() {
   const [session, setSession] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState('Dashboard');
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -34,16 +42,23 @@ export default function App() {
         </div>
         <nav className="flex-1 p-4 space-y-2">
           {[
-            { icon: LayoutDashboard, label: 'Dashboard', active: true },
+            { icon: LayoutDashboard, label: 'Dashboard' },
+            { icon: MessageSquare, label: 'Communication Center' },
             { icon: Users, label: 'Customers' },
             { icon: FileText, label: 'Loan Applications' },
             { icon: Settings, label: 'Settings' }
           ].map((item, i) => (
-            <a key={i} href="#" className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${item.active ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'}`}>
-              {/* Using the icon component from array dynamically requires proper capital letter usage or React.createElement, which is fine as <item.icon/> works in React */}
+            <button 
+              key={i} 
+              onClick={() => {
+                setActiveTab(item.label);
+                setSelectedCustomerId(null); // Reset profile view when changing tabs
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${activeTab === item.label ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white text-slate-300'}`}
+            >
               <item.icon className="w-5 h-5" />
               <span className="font-medium">{item.label}</span>
-            </a>
+            </button>
           ))}
         </nav>
       </aside>
@@ -68,33 +83,37 @@ export default function App() {
         </header>
 
         {/* Dashboard Content */}
-        <div className="p-8 flex-1 overflow-y-auto">
-          <h1 className="text-2xl font-bold text-slate-900 mb-6">Dashboard Overview</h1>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {[
-              { label: 'Total Applications', value: '1,248', trend: '+12%' },
-              { label: 'Pending Approvals', value: '45', trend: '-2%' },
-              { label: 'Disbursed Amount', value: '₹4.2Cr', trend: '+24%' }
-            ].map((stat, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <p className="text-slate-500 text-sm font-medium mb-1">{stat.label}</p>
-                <div className="flex items-end gap-3">
-                  <h3 className="text-3xl font-bold text-slate-900">{stat.value}</h3>
-                  <span className={`text-sm font-medium mb-1 ${stat.trend.startsWith('+') ? 'text-emerald-600' : 'text-rose-600'}`}>
-                    {stat.trend}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Recent Applications</h2>
-            <div className="h-64 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-xl bg-slate-50 text-slate-400">
-              Data visualization component goes here...
+        <div className="flex-1 overflow-hidden bg-slate-100">
+          {activeTab === 'Communication Center' ? (
+            <div className="p-4 h-full"><CommunicationCenter /></div>
+          ) : activeTab === 'Dashboard' ? (
+            <div className="h-full overflow-y-auto p-4">
+              <IntelligenceConsole />
             </div>
-          </div>
+          ) : activeTab === 'Customers' ? (
+            selectedCustomerId ? (
+              <CustomerProfile 
+                customerId={selectedCustomerId} 
+                onBack={() => setSelectedCustomerId(null)} 
+              />
+            ) : (
+              <Customers onSelectCustomer={setSelectedCustomerId} />
+            )
+          ) : activeTab === 'Loan Applications' ? (
+            <LoanApplications />
+          ) : activeTab === 'Settings' ? (
+            <SettingsPage />
+          ) : (
+            <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
+              <div className="w-16 h-16 bg-slate-200 rounded-2xl flex items-center justify-center mb-6">
+                <Settings className="w-8 h-8 text-slate-400" />
+              </div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">{activeTab}</h1>
+              <p className="text-slate-500 max-w-sm">
+                This module is currently under construction and will be available in a future update.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>
