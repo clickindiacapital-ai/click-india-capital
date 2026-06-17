@@ -12,6 +12,7 @@ import InsightDetail from './pages/InsightDetail';
 import Contact from './pages/Contact';
 import Legal from './pages/Legal';
 import Advisory from './pages/Advisory';
+import ClientPortal from './pages/ClientPortal';
 
 export default function App() {
   return (
@@ -28,6 +29,8 @@ export default function App() {
         <Route path="insights/:id" element={<InsightDetail />} />
         <Route path="contact" element={<Contact />} />
         <Route path="advisory" element={<Advisory />} />
+        {/* Disable Customer Portal temporarily */}
+        {/* <Route path="portal" element={<ClientPortal />} /> */}
         <Route path="assistant" element={<Home />} />
         
         {/* Legal Routes */}

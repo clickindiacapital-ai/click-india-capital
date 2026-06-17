@@ -124,6 +124,20 @@ const CommunicationCenter = () => {
     }
   };
 
+  const handleSendWhatsAppMessage = async () => {
+    if (!inputMessage.trim() || !activeLead) return;
+
+    const phone = activeLead.phone.replace(/[^0-9]/g, '');
+    const fullPhone = phone.length === 10 ? '91' + phone : phone;
+    const encodedText = encodeURIComponent(inputMessage);
+
+    // Open pre-filled official WhatsApp chat in new window
+    window.open(`https://wa.me/${fullPhone}?text=${encodedText}`, '_blank');
+
+    // Sync by saving internally in the CRM chat log
+    await handleSendMessage();
+  };
+
   const handleVerifyPayment = async (submissionId: string, status: 'APPROVED' | 'REJECTED') => {
     try {
       // Use system admin ID for pilot
@@ -318,13 +332,26 @@ const CommunicationCenter = () => {
                           <Bot size={16} />
                         </button>
                       </div>
-                      <button 
-                        onClick={handleSendMessage}
-                        disabled={!inputMessage.trim()}
-                        className={`p-2 rounded-xl transition-all ${inputMessage.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'bg-white/5 text-gray-600'}`}
-                      >
-                        <Send size={16} />
-                      </button>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={handleSendMessage}
+                          disabled={!inputMessage.trim()}
+                          className={`p-2 rounded-xl transition-all ${inputMessage.trim() ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 hover:bg-blue-500' : 'bg-white/5 text-gray-600'}`}
+                          title="Save in CRM Chat logs only"
+                        >
+                          <Send size={16} />
+                        </button>
+                        <button 
+                          onClick={handleSendWhatsAppMessage}
+                          disabled={!inputMessage.trim()}
+                          className={`p-2 rounded-xl transition-all ${inputMessage.trim() ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/40 hover:bg-emerald-500' : 'bg-white/5 text-gray-600'}`}
+                          title="Send via WhatsApp & Log in CRM"
+                        >
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.588 1.977 14.12 .953 11.5 .953c-5.44 0-9.866 4.372-9.87 9.802 0 1.714.46 3.393 1.332 4.888L1.93 21.056l4.717-1.229c.001-.001.002-.001.002-.001zm11.758-6.72c-.3-.149-1.774-.863-2.046-.961-.273-.099-.472-.149-.669.149-.198.299-.766.961-.94 1.159-.173.199-.348.223-.648.075-.3-.15-1.266-.46-2.41-1.472-.89-.785-1.49-1.755-1.665-2.053-.173-.297-.018-.458.13-.606.134-.133.3-.347.45-.52.149-.172.2-.297.3-.495.099-.198.05-.371-.025-.52-.075-.149-.669-1.587-.916-2.182-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.774-.719 2.022-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347z"/>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>

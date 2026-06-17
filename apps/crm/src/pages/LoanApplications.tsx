@@ -3,14 +3,18 @@ import { Loader2, Plus, AlertCircle, FileText, CheckCircle2, XCircle } from 'luc
 import { leadService } from '../services/supabaseClient';
 
 const COLUMNS = [
-  { id: 'new', title: 'New Leads', icon: Plus, color: 'blue' },
-  { id: 'document_collection', title: 'Document Collection', icon: FileText, color: 'orange' },
-  { id: 'underwriting', title: 'Underwriting', icon: AlertCircle, color: 'purple' },
-  { id: 'approved', title: 'Approved', icon: CheckCircle2, color: 'emerald' },
-  { id: 'rejected', title: 'Rejected', icon: XCircle, color: 'red' },
+  { id: 'NEW', title: 'New Leads', icon: Plus, color: 'blue' },
+  { id: 'DOCUMENTS_PENDING', title: 'Docs Pending', icon: FileText, color: 'orange' },
+  { id: 'SUBMITTED', title: 'Underwriting', icon: AlertCircle, color: 'purple' },
+  { id: 'APPROVED', title: 'Approved', icon: CheckCircle2, color: 'emerald' },
+  { id: 'REJECTED', title: 'Rejected', icon: XCircle, color: 'red' },
 ];
 
-export default function LoanApplications() {
+interface LoanApplicationsProps {
+  onSelectCustomer?: (customerId: string) => void;
+}
+
+export default function LoanApplications({ onSelectCustomer }: LoanApplicationsProps) {
   const [leads, setLeads] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -20,9 +24,14 @@ export default function LoanApplications() {
 
   const fetchLeads = async () => {
     setIsLoading(true);
-    const { data } = await leadService.getAllLeads();
-    setLeads(data || []);
-    setIsLoading(false);
+    try {
+      const { data } = await leadService.getAllLeads();
+      setLeads(data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDragStart = (e: React.DragEvent, leadId: string) => {
@@ -46,7 +55,11 @@ export default function LoanApplications() {
     );
 
     // Persist to DB
-    await leadService.updateLead(leadId, { status: statusId });
+    try {
+      await leadService.updateLead(leadId, { status: statusId });
+    } catch (err) {
+      console.error('Failed to update lead status:', err);
+    }
   };
 
   return (
@@ -65,7 +78,7 @@ export default function LoanApplications() {
         ) : (
           <div className="flex gap-6 h-full min-w-max pb-4">
             {COLUMNS.map(column => {
-              const columnLeads = leads.filter(l => (l.status || 'new') === column.id);
+              const columnLeads = leads.filter(l => (l.status || 'NEW') === column.id);
               const Icon = column.icon;
 
               return (
@@ -75,7 +88,7 @@ export default function LoanApplications() {
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, column.id)}
                 >
-                  <div className={`p-4 bg-white border-b border-slate-200 flex items-center justify-between`}>
+                  <div className="p-4 bg-white border-b border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className={`w-8 h-8 rounded-full bg-${column.color}-100 text-${column.color}-600 flex items-center justify-center`}>
                         <Icon size={16} />
@@ -96,24 +109,38 @@ export default function LoanApplications() {
                         className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm cursor-grab active:cursor-grabbing hover:border-blue-300 transition-colors"
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-bold text-slate-900">{lead.phone}</h4>
+                          <h4 className="font-bold text-slate-900">{lead.name || 'Unnamed Lead'}</h4>
                           {lead.urgent_action_required && (
                             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                           )}
                         </div>
                         
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <p className="text-xs text-slate-500 font-medium">
-                            Type: {lead.loan_type?.replace('_', ' ') || 'UNSPECIFIED'}
+                            Phone: {lead.phone || 'N/A'}
                           </p>
-                          <p className="text-xs text-slate-500 font-medium">
-                            Status: {lead.employment_status || 'Unknown'}
+                          {lead.email && (
+                            <p className="text-xs text-slate-500 font-medium truncate">
+                              Email: {lead.email}
+                            </p>
+                          )}
+                          <p className="text-xs text-slate-600 font-semibold uppercase mt-1">
+                            Loan: {lead.loan_type?.replace('_', ' ') || 'UNSPECIFIED'}
                           </p>
                         </div>
                         
                         <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-[10px] uppercase font-bold text-slate-400">
                           <span>{new Date(lead.created_at).toLocaleDateString()}</span>
-                          <button className="hover:text-blue-600 transition-colors">View Details</button>
+                          {lead.customer_id && onSelectCustomer ? (
+                            <button 
+                              onClick={() => onSelectCustomer(lead.customer_id)}
+                              className="text-blue-600 hover:text-blue-800 transition-colors"
+                            >
+                              View Details
+                            </button>
+                          ) : (
+                            <span className="opacity-50">View Details</span>
+                          )}
                         </div>
                       </div>
                     ))}

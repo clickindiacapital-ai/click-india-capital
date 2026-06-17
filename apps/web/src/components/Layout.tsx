@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { IndianRupee, Menu, X } from 'lucide-react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,12 +6,24 @@ import LanguageSelector from './LanguageSelector';
 import Footer from './Footer';
 import ChatBot from './ChatBot';
 import WhatsAppWidget from './WhatsAppWidget';
+import { supabase } from '../utils/supabaseClient';
 
 export default function Layout() {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setHasSession(!!session);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setHasSession(!!session);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
   
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col relative">

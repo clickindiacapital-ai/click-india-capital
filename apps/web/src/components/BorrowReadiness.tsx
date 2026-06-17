@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, CheckCircle2, AlertTriangle, Calculator, ChevronRight } from 'lucide-react';
 import { supabase } from '../utils/supabaseClient';
+import { generateUUID } from '../utils/uuid';
 
 export default function BorrowReadiness() {
   const { t } = useTranslation();
@@ -88,15 +89,75 @@ export default function BorrowReadiness() {
       documentation: 8
     };
 
-    const resultObj = { totalScore, chances, color, risks, suggestions, loanHealth };
+    // Evaluate Credit Policy Engine Rules
+    let matchedLenders: any[] = [];
+    try {
+      const { data: policies, error } = await supabase
+        .from('lender_policies')
+        .select('*')
+        .eq('active', true);
+      
+      if (policies && !error) {
+        const userFoirPct = foir * 100;
+        let userLoanType = 'Personal Loan';
+        if (formData.loanType === 'Business') userLoanType = 'Business Loan';
+        else if (formData.loanType === 'Home') userLoanType = 'Home Loan';
+        else if (formData.loanType === 'Vehicle') userLoanType = 'Vehicle Loan';
+
+        const normalizedEmployment = formData.employment === 'SelfEmployed' ? 'Self-Employed' : formData.employment;
+
+        matchedLenders = policies.map((policy: any) => {
+          const cibilOk = score >= policy.min_cibil;
+          const incomeOk = income >= policy.min_income;
+          const foirOk = userFoirPct <= policy.max_foir_percentage;
+          const employmentOk = policy.allowed_employment_types.includes(normalizedEmployment);
+          const loanOk = policy.allowed_loan_types.includes(userLoanType);
+
+          const passedChecks = [cibilOk, incomeOk, foirOk, employmentOk, loanOk].filter(Boolean).length;
+          
+          let matchStatus = 'Low Match';
+          let matchColor = 'red';
+          if (passedChecks === 5) {
+            matchStatus = 'High Match';
+            matchColor = 'emerald';
+          } else if (passedChecks >= 3) {
+            matchStatus = 'Moderate Match';
+            matchColor = 'amber';
+          }
+
+          return {
+            bank_name: policy.bank_name,
+            base_rate: policy.base_interest_rate,
+            status: matchStatus,
+            color: matchColor,
+            notes: policy.notes,
+            cibilOk,
+            incomeOk,
+            foirOk,
+            employmentOk,
+            loanOk
+          };
+        });
+
+        const matchOrder: Record<string, number> = { 'High Match': 1, 'Moderate Match': 2, 'Low Match': 3 };
+        matchedLenders.sort((a, b) => matchOrder[a.status] - matchOrder[b.status]);
+      }
+    } catch (err) {
+      console.error('Failed to query Credit Policy Rule Engine:', err);
+    }
+
+    const resultObj = { totalScore, chances, color, risks, suggestions, loanHealth, matchedLenders };
     setScoreResult(resultObj);
     setIsCalculating(false);
 
     // Save to CRM (Supabase)
     try {
       if (formData.name && formData.phone) {
+        const customerId = generateUUID();
+
         // Create Customer
-        const { data: customerData, error: customerError } = await supabase.from('customers').insert([{
+        const { error: customerError } = await supabase.from('customers').insert([{
+          id: customerId,
           name: formData.name,
           phone: formData.phone,
           city: formData.city,
@@ -108,12 +169,12 @@ export default function BorrowReadiness() {
           borrow_readiness_score: totalScore,
           loan_health_metrics: loanHealth,
           tags: [formData.worry]
-        }]).select().single();
+        }]);
 
-        if (customerData && !customerError) {
+        if (!customerError) {
           // Create Lead
           await supabase.from('leads').insert([{
-            customer_id: customerData.id,
+            customer_id: customerId,
             name: formData.name,
             phone: formData.phone,
             loan_type: formData.loanType,
@@ -121,6 +182,8 @@ export default function BorrowReadiness() {
             source: 'Borrow Readiness Check',
             urgent_action_required: false
           }]);
+        } else {
+          console.error('Customer insert error:', customerError);
         }
       }
     } catch (err) {
@@ -335,6 +398,105 @@ export default function BorrowReadiness() {
                       </li>
                     ))}
                   </ul>
+               </div>
+            </div>
+
+            {/* Tentative Lender Matches via Credit Policy Rule Engine */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 mb-8">
+               <h4 className="font-black text-xl text-slate-900 mb-2 uppercase tracking-tighter">Tentative Lender Matches</h4>
+               <p className="text-slate-500 text-xs mb-6">Based on active bank credit policies and interest rates in our system.</p>
+               
+               <div className="space-y-4">
+                 {scoreResult.matchedLenders && scoreResult.matchedLenders.length > 0 ? (
+                   scoreResult.matchedLenders.map((match: any, i: number) => (
+                     <div key={i} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 bg-slate-50 rounded-2xl border border-slate-100 gap-4 transition-all hover:border-slate-200">
+                       <div className="space-y-1">
+                         <div className="flex items-center gap-2.5">
+                           <span className="font-bold text-slate-900 text-base">{match.bank_name}</span>
+                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                             match.color === 'emerald' ? 'bg-emerald-100 text-emerald-700' : match.color === 'amber' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                           }`}>
+                             {match.status}
+                           </span>
+                         </div>
+                         <p className="text-xs text-slate-400 max-w-md">{match.notes || 'Meets guidelines requirements.'}</p>
+                         
+                         {/* Checks breakdown */}
+                         <div className="flex flex-wrap gap-x-3 gap-y-1 pt-2 text-[10px] font-bold text-slate-400">
+                           <span className={match.cibilOk ? 'text-emerald-600' : 'text-red-500'}>
+                             {match.cibilOk ? '✓' : '✗'} CIBIL
+                           </span>
+                           <span className={match.incomeOk ? 'text-emerald-600' : 'text-red-500'}>
+                             {match.incomeOk ? '✓' : '✗'} Income
+                           </span>
+                           <span className={match.foirOk ? 'text-emerald-600' : 'text-red-500'}>
+                             {match.foirOk ? '✓' : '✗'} FOIR
+                           </span>
+                           <span className={match.employmentOk ? 'text-emerald-600' : 'text-red-500'}>
+                             {match.employmentOk ? '✓' : '✗'} Profile
+                           </span>
+                         </div>
+                       </div>
+                       
+                       <div className="text-left sm:text-right shrink-0">
+                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base Rate</p>
+                         <p className="text-xl font-black text-blue-600 mt-0.5">Starting @ {match.base_rate.toFixed(2)}%</p>
+                       </div>
+                     </div>
+                   ))
+                 ) : (
+                   <p className="text-slate-400 text-sm py-4 text-center">No active policies configured in CRM engine.</p>
+                 )}
+               </div>
+            </div>
+
+            {/* Dynamic Documents Checklist */}
+            <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 mb-8">
+               <h4 className="font-black text-lg text-slate-900 mb-2 uppercase tracking-tight flex items-center gap-2">
+                 📄 Required Documents Checklist
+               </h4>
+               <p className="text-slate-500 text-xs mb-4">Please prepare the following documents based on your {formData.employment === 'SelfEmployed' ? 'Self-Employed' : 'Salaried'} profile to proceed.</p>
+               
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-700">
+                 {formData.employment === 'SelfEmployed' ? (
+                   <>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" defaultChecked />
+                       <span>PAN Card & Aadhaar Card</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>ITR Returns (Last 2 Years)</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>GST Certificate & Business Proof</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>Bank Statements (Last 12 Months)</span>
+                     </div>
+                   </>
+                 ) : (
+                   <>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" defaultChecked />
+                       <span>PAN Card & Aadhaar Card</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>Salary Slips (Last 3 Months)</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>Form 16 / ITR Filings</span>
+                     </div>
+                     <div className="flex items-center gap-2.5 bg-white p-3.5 rounded-xl border border-slate-100">
+                       <input type="checkbox" className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4" />
+                       <span>Bank Statements (Last 6 Months)</span>
+                     </div>
+                   </>
+                 )}
                </div>
             </div>
 

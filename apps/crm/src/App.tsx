@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, Settings, Bell, Search, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Bell, Search, MessageSquare, ShieldCheck, BookOpen, Smartphone } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CRMLogin from './components/CRMLogin';
 import CommunicationCenter from './pages/CommunicationCenter';
@@ -6,6 +6,9 @@ import IntelligenceConsole from './components/IntelligenceConsole';
 import Customers from './pages/Customers';
 import CustomerProfile from './pages/CustomerProfile';
 import LoanApplications from './pages/LoanApplications';
+import PolicyManager from './pages/PolicyManager';
+import BlogManager from './pages/BlogManager';
+import OutreachCampaign from './pages/OutreachCampaign';
 import SettingsPage from './pages/Settings';
 import supabase from './services/supabaseClient';
 
@@ -44,7 +47,10 @@ export default function App() {
           {[
             { icon: LayoutDashboard, label: 'Dashboard' },
             { icon: MessageSquare, label: 'Communication Center' },
+            { icon: Smartphone, label: 'Cold Outreach' },
             { icon: Users, label: 'Customers' },
+            { icon: ShieldCheck, label: 'Credit Policies' },
+            { icon: BookOpen, label: 'Insights Manager' },
             { icon: FileText, label: 'Loan Applications' },
             { icon: Settings, label: 'Settings' }
           ].map((item, i) => (
@@ -90,6 +96,8 @@ export default function App() {
             <div className="h-full overflow-y-auto p-4">
               <IntelligenceConsole />
             </div>
+          ) : activeTab === 'Cold Outreach' ? (
+            <OutreachCampaign />
           ) : activeTab === 'Customers' ? (
             selectedCustomerId ? (
               <CustomerProfile 
@@ -99,8 +107,17 @@ export default function App() {
             ) : (
               <Customers onSelectCustomer={setSelectedCustomerId} />
             )
+          ) : activeTab === 'Credit Policies' ? (
+            <PolicyManager />
+          ) : activeTab === 'Insights Manager' ? (
+            <BlogManager />
           ) : activeTab === 'Loan Applications' ? (
-            <LoanApplications />
+            <LoanApplications 
+              onSelectCustomer={(customerId) => {
+                setSelectedCustomerId(customerId);
+                setActiveTab('Customers');
+              }} 
+            />
           ) : activeTab === 'Settings' ? (
             <SettingsPage />
           ) : (
