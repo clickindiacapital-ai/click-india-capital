@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Sparkles, MessageSquare, ArrowRight, UserCheck, Star } from 'lucide-react';
+import { Shield, Sparkles, MessageSquare, ArrowRight, UserCheck } from 'lucide-react';
 
 export default function ComingSoon() {
   const handleWhatsAppChat = () => {
@@ -59,22 +59,6 @@ export default function ComingSoon() {
             <UserCheck className="text-emerald-400 mb-2" size={16} />
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Advisory Driven</h4>
             <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">Analyze and repair credit health scores before submitting.</p>
-          </div>
-        </div>
-
-        {/* Founder Bio callout */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/20 to-purple-950/20 border border-blue-500/10 flex items-center gap-4 text-left">
-          <div className="w-10 h-10 rounded-xl bg-blue-600/20 flex items-center justify-center font-bold text-blue-400">
-            SK
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-              <span>Sameer Krishnan</span>
-              <span className="flex items-center text-amber-400 gap-0.5 text-[8px] font-bold"><Star size={8} className="fill-current" /> 25+ Yrs</span>
-            </h4>
-            <p className="text-[10px] text-slate-400 mt-0.5 leading-relaxed">
-              Founder & Chief Advisor (Ex-HDFC Bank, ESAF, Mahindra Finance).
-            </p>
           </div>
         </div>
 
