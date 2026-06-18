@@ -829,7 +829,7 @@ export default function ClientPortal() {
               <div className="bg-white border border-slate-200 rounded-[32px] p-8 shadow-sm">
                 <div className="mb-6">
                   <h3 className="font-black text-xl text-slate-900 uppercase tracking-tight">Your Private Vault</h3>
-                  <p className="text-slate-500 text-sm mt-1">Upload files securely. Uploaded documents are encrypted and accessible only to you and Sameer Krishnan (Advisory Lead).</p>
+                  <p className="text-slate-500 text-sm mt-1">Upload files securely. Uploaded documents are encrypted and accessible only to you and our advisory team.</p>
                 </div>
 
                 {uploadMessage && (

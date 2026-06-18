@@ -206,7 +206,7 @@ CREATE TABLE public.blog_posts (
     excerpt TEXT,
     category TEXT NOT NULL,
     image_url TEXT,
-    author TEXT DEFAULT 'Sameer Krishnan',
+    author TEXT DEFAULT 'Advisory Lead',
     published BOOLEAN DEFAULT true
 );
 
@@ -227,7 +227,7 @@ Many borrowers find their loan applications rejected despite having a stable job
 4. **Employment Stability:** Lenders require at least 1-2 continuous years with the same employer.
 5. **Lack of Address/Identity Verification:** Incorrect documents or failed physical verifications are silent rejection reasons.
 
-*Read our guide on how to restructure your debts before applying!*', 'Learn the 5 critical mistakes borrowers make that lead to automatic loan rejections by banks and NBFCs.', 'Advisory Guides', 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=60', 'Sameer Krishnan'),
+*Read our guide on how to restructure your debts before applying!*', 'Learn the 5 critical mistakes borrowers make that lead to automatic loan rejections by banks and NBFCs.', 'Advisory Guides', 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&auto=format&fit=crop&q=60', 'Advisory Lead'),
 ('How FOIR Affects Your Home Loan Eligibility', 'how-foir-affects-home-loan-eligibility', '### What is FOIR?
 
 Fixed Obligation to Income Ratio (FOIR) is a formula bank underwriters use to evaluate your disposable income. Here is how it is calculated:
@@ -239,7 +239,7 @@ For example, if your income is ₹1,00,000 and your EMIs are ₹40,000, your FOI
 ### How to lower your FOIR:
 - **Prepay small loans:** Clear outstanding personal loans or credit card EMIs before applying.
 - **Include co-applicant income:** Adding your spouse or parents as co-applicants increases the total net income, lowering the ratio.
-- Extend tenure:** Opting for a longer loan tenure reduces the monthly EMI payment, bringing your FOIR under the bank threshold.', 'A deep dive into Fixed Obligation to Income Ratio (FOIR) and how banks calculate your debt capacity.', 'Debt Strategy', 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop&q=60', 'Sameer Krishnan');
+- Extend tenure:** Opting for a longer loan tenure reduces the monthly EMI payment, bringing your FOIR under the bank threshold.', 'A deep dive into Fixed Obligation to Income Ratio (FOIR) and how banks calculate your debt capacity.', 'Debt Strategy', 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop&q=60', 'Advisory Lead');
 
 
 -- 11. Storage Bucket & RLS Setup for Secure Client Portal

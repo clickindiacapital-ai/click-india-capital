@@ -38,7 +38,7 @@
       {
         "name": "Amit Patel",
         "role": "First-time Homebuyer",
-        "quote": "I thought getting a home loan would be stressful, but Sameer's expert advice made it easy. Honest guidance without any hidden surprises."
+        "quote": "I thought getting a home loan would be stressful, but the expert advice from Click India Capital made it easy. Honest guidance without any hidden surprises."
       }
     ],
     "floatingCta": "Apply Now",
@@ -49,11 +49,11 @@
       "transparent": "100% Transparent Process"
     },
     "founder": {
-      "title": "Meet the Founder",
-      "name": "Sameer Krishnan",
-      "description": "Founder of Click India Capital with over 25 years of experience across banks, NBFCs, and retail lending institutions. Former Product Manager at ESAF Small Finance Bank with extensive background spanning Mahindra Finance, Volkswagen Finance, ICICI Bank, and HDFC Bank.",
+      "title": "Meet Our Advisory Lead",
+      "name": "Chief Advisory Team",
+      "description": "Led by seasoned finance professionals with over 25 years of experience across premier banks, NBFCs, and retail lending institutions. Our advisory team brings an extensive background spanning organizations like ESAF Small Finance Bank, Mahindra Finance, Volkswagen Finance, ICICI Bank, and HDFC Bank.",
       "philosophy": "Our goal is not just to help you get a loan, but to act as your financial advisor. We diagnose why you were rejected, structure your profile, and guide you towards financial stability.",
-      "tags": ["Founder-Led Guidance", "Transparent Advice", "Trusted Expertise"]
+      "tags": ["Expert-Led Guidance", "Transparent Advice", "Trusted Expertise"]
     },
     "consulting": {
       "title": "Expert Loan Guidance",
@@ -67,7 +67,7 @@
       "call": {
         "title": "Voice or Video Consultation",
         "price": "₹199",
-        "desc": "Book a 1-on-1 consultation with the founder and get expert guidance backed by years of experience in retail lending.",
+        "desc": "Book a 1-on-1 consultation with our advisory lead and get expert guidance backed by years of experience in retail lending.",
         "btn": "Book Call"
       },
       "blueprint": {
@@ -94,7 +94,7 @@
       "low": "Needs Improvement",
       "disclaimer": "Results are indicative only. Final approval rests with lending institutions based on comprehensive credit policies.",
       "ctaHigh": "Proceed to Application",
-      "ctaLow": "Fix Your Profile with Sameer"
+      "ctaLow": "Improve Your Credit Health"
     },
     "security": {
       "title": "Bank-Grade Security",
@@ -263,24 +263,24 @@
   },
   "about": {
     "title": "About Click India Capital",
-    "subtitle": "Founder-led, expert-driven.",
+    "subtitle": "Expert-led, professional advisory.",
     "p1": "Click India Capital was founded with a simple mission — to make finding the right loan easier, faster, and more transparent.",
-    "p2": "Unlike large loan marketplaces that operate through call centers and automated systems, Click India Capital is led by a lending professional with over 25 years of experience across banks, NBFCs, captive finance companies, and retail lending institutions. Our experience spans vehicle loans, commercial vehicle finance, two-wheeler finance, personal lending, collections, portfolio management, dealer network development, and digital lending transformation.",
-    "p3": "Having worked with leading organizations including ESAF Small Finance Bank, Mahindra & Mahindra Financial Services, Volkswagen Finance, ICICI Bank, HDFC Bank, Mashreq Bank, GE Money, Ashok Leyland Finance, and Popular Automobiles, we understand how lenders evaluate applications and what borrowers need to improve their chances of approval.",
+    "p2": "Unlike large loan marketplaces that operate through call centers and automated systems, Click India Capital is led by a team of lending professionals with over 25 years of combined experience across banks, NBFCs, captive finance companies, and retail lending institutions. Our team's experience spans vehicle loans, commercial vehicle finance, two-wheeler finance, personal lending, collections, portfolio management, dealer network development, and digital lending transformation.",
+    "p3": "With past experience at leading organizations including ESAF Small Finance Bank, Mahindra & Mahindra Financial Services, Volkswagen Finance, ICICI Bank, HDFC Bank, Mashreq Bank, GE Money, Ashok Leyland Finance, and Popular Automobiles, our advisors understand how lenders evaluate applications and what borrowers need to improve their chances of approval.",
     "p4": "At Click India Capital, we combine industry expertise with technology to help customers compare loan options, assess eligibility, understand documentation requirements, and connect with suitable lending partners. Our goal is not just to help customers obtain loans, but to help them make informed financial decisions.",
     "p5": "Whether you are purchasing a vehicle, growing a business, buying a home, or seeking personal financing, Click India Capital is committed to providing honest guidance, transparent processes, and personalized support throughout your loan journey.",
     "p6": "We believe every financial decision deserves expert attention, and every customer deserves a trusted partner.",
-    "founderTitle": "Meet the Founder",
-    "founderName": "Sameer Krishnan",
-    "founderP1": "Sameer Krishnan is a retail lending and product management professional with more than 25 years of experience in the Indian financial services industry. Throughout his career, he has worked with leading banks, NBFCs, and finance companies across sales, credit, collections, product management, dealer development, and digital transformation initiatives.",
-    "founderP2": "After serving as Product Manager – Mobility Loans at ESAF Small Finance Bank, he has now dedicated his full time to developing Click India Capital, converting his 25+ years of industry experience into an entrepreneurial journey. His extensive background includes managing lending portfolios, developing lending products, improving operational processes, maintaining portfolio quality, and building strong partner ecosystems across India.",
-    "founderP3": "Click India Capital is founded on this experience, with a focus on helping customers navigate the loan process confidently and responsibly.",
+    "founderTitle": "Our Advisory Lead",
+    "founderName": "Chief Advisory Lead",
+    "founderP1": "Our Chief Advisory Lead is a seasoned retail lending and product management professional with more than 25 years of experience in the Indian financial services industry. Throughout their career, they have worked with leading banks, NBFCs, and finance companies across sales, credit, collections, product management, dealer development, and digital transformation initiatives.",
+    "founderP2": "Having served in key roles such as Product Manager – Mobility Loans at leading financial institutions, they have dedicated their efforts to structuring Click India Capital, converting 25+ years of industry experience into structured financial guidance. This extensive background includes managing lending portfolios, developing lending products, improving operational processes, maintaining portfolio quality, and building strong partner ecosystems across India.",
+    "founderP3": "Click India Capital is built on this foundation, with a focus on helping customers navigate the loan process confidently and responsibly.",
     "credibility": [
       "25+ Years Experience",
       "Pan-India Lending Expertise",
       "Banks & NBFC Experience",
       "Digital Lending & Product Management",
-      "Founder-Led Service"
+      "Expert-Led Service"
     ],
     "stats": [
       {"label": "Happy Customers", "value": "10K+"},
@@ -356,7 +356,7 @@
     "q_employment": "Great! Are you Salaried or Self-Employed?",
     "q_salary": "What is your approximate net monthly income in Rupees? (e.g. 50000)",
     "q_name": "Perfect. I have compiled your profile! Please provide your Full Name.",
-    "q_phone": "And finally, what is your 10-digit Mobile Number so our expert Sameer can contact you with your exact loan offers?",
+    "q_phone": "And finally, what is your 10-digit Mobile Number so our advisory team can contact you with your exact loan offers?",
     "success": "Thank you! 🎉 We have received your details. Our team will contact you shortly with your personalized offers.",
     "placeholder": "Type your message..."
   },

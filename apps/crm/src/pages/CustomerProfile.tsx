@@ -56,7 +56,7 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
     if (!phoneNum) return;
     const cleanPhone = phoneNum.replace(/[^0-9]/g, '');
     const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-    const greeting = `Hello ${customer?.name || ''}, Sameer here from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
+    const greeting = `Hello ${customer?.name || ''}, this is the advisory team from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
     const encodedText = encodeURIComponent(greeting);
     window.open(`https://wa.me/${fullPhone}?text=${encodedText}`, '_blank');
   };
@@ -110,7 +110,7 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
       await supabase.from('customer_timeline').insert([{
         customer_id: customerId,
         event_type: 'METRICS_UPDATED',
-        description: `Advisory readiness metrics manually updated by Sameer. New Score: ${newScore}/100.`
+        description: `Advisory readiness metrics manually updated. New Score: ${newScore}/100.`
       }]);
 
       alert('Metrics updated successfully!');
@@ -174,7 +174,7 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
         .insert([{
           customer_id: customerId,
           event_type: 'OPTED_OUT',
-          description: 'Customer requested to STOP outreach. Phone added to global DNC blocklist by Sameer.'
+          description: 'Customer requested to STOP outreach. Phone added to global DNC blocklist by Advisor.'
         }]);
 
       if (timelineError) throw timelineError;

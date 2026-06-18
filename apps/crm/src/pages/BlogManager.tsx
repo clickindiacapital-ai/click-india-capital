@@ -30,7 +30,7 @@ export default function BlogManager() {
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState('Advisory Guides');
   const [imageUrl, setImageUrl] = useState('');
-  const [author, setAuthor] = useState('Sameer Krishnan');
+  const [author, setAuthor] = useState('Advisory Lead');
   const [isPublished, setIsPublished] = useState(true);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -75,7 +75,7 @@ export default function BlogManager() {
     setExcerpt('');
     setCategory('Advisory Guides');
     setImageUrl('');
-    setAuthor('Sameer Krishnan');
+    setAuthor('Advisory Lead');
     setIsPublished(true);
     setIsEditing(false);
     setSelectedId(null);

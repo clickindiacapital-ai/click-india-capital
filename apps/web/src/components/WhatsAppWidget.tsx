@@ -45,7 +45,7 @@ export default function WhatsAppWidget() {
           name: leadName,
           phone: leadPhone,
           whatsapp: leadPhone,
-          primary_goal: 'Founder Consultation Lead'
+          primary_goal: 'Advisory Consultation Lead'
         }]);
 
       if (!customerError) {
@@ -110,12 +110,12 @@ export default function WhatsAppWidget() {
             {!showLeadForm ? (
               <>
                 <p className="font-bold text-sm mb-1 pr-4">Need Expert Guidance?</p>
-                <p className="text-xs text-slate-500 mb-3">Get personalized assistance directly from the founder.</p>
+                <p className="text-xs text-slate-500 mb-3">Get personalized assistance directly from our advisor.</p>
                 <button 
                   onClick={() => setShowLeadForm(true)}
                   className="w-full py-2 bg-[#25D366] text-white text-xs font-bold rounded-lg hover:bg-[#20bd5a] transition-colors"
                 >
-                  Chat with Sameer
+                  Chat with Advisor
                 </button>
               </>
             ) : (

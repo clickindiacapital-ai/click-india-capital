@@ -4,9 +4,9 @@ import { Shield, Sparkles, MessageSquare, ArrowRight, UserCheck } from 'lucide-r
 
 export default function ComingSoon() {
   const handleWhatsAppChat = () => {
-    // Standard direct wa.me link to Sameer
-    const phone = '919876543210'; // Sameer's contact number
-    const greeting = 'Hello Sameer, I saw that Click India Capital is launching soon. I would like to get in touch for a loan consultation.';
+    // Standard direct wa.me link to Advisory Team
+    const phone = '919876543210'; // Advisory contact number
+    const greeting = 'Hello, I saw that Click India Capital is launching soon. I would like to get in touch for a loan consultation.';
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(greeting)}`, '_blank');
   };
 
@@ -73,7 +73,7 @@ export default function ComingSoon() {
             <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
           <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">
-            Direct Founder Consultation • Zero Cost Advisory
+            Direct Expert Consultation • Zero Cost Advisory
           </span>
         </div>
       </motion.div>

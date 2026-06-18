@@ -51,14 +51,14 @@ export default function OutreachCampaign() {
   const isLockedTime = currentHour < 10 || currentHour >= 17;
 
   const defaultTemplates = [
-    `Hello, Sameer Krishnan here from Click India Capital. \nWe help business owners and salaried professionals check their actual bank loan eligibility and fix profile issues before applying to prime lenders like HDFC and SBI. \nIf you are planning to apply for a Home, Business, or Vehicle loan soon, you can run a free 2-minute eligibility check on our platform:\n👉 clickindiacapital.in`,
-    `Hi! Sameer Krishnan from Click India Capital. \nBefore applying for any Home, Business, or Vehicle loan, it is crucial to check your bank eligibility score to avoid standard rejections. \nCheck your readiness and get your matched banks for free in 2 minutes here:\n👉 clickindiacapital.in`,
-    `Greetings! This is Sameer Krishnan from Click India Capital. \nWe help borrowers check and fix their bank loan eligibility profiles before submitting to HDFC or SBI. \nRun a quick, free 2-minute borrow readiness check here:\n👉 clickindiacapital.in`,
-    `Hello! Sameer Krishnan here. Confused about bank eligibility criteria? \nAt Click India Capital, we evaluate your financial profile against 20+ lenders to check matches. \nStart your free eligibility check here in 2 minutes:\n👉 clickindiacapital.in`,
-    `Hi, this is Sameer from Click India Capital. \nDid you know that 30% of loans get rejected due to basic profile errors? We help you detect and correct them beforehand. \nFind your eligible lenders instantly for free:\n👉 clickindiacapital.in`,
-    `Greetings! Sameer Krishnan here from Click India Capital. \nWe specialize in home, vehicle, and business loan advisory. Get a clear view of your loan health score before approaching banks. \nCheck your readiness today:\n👉 clickindiacapital.in`,
-    `Hi there! Sameer here. Looking for a home, business, or auto loan? \nAvoid multiple hard inquiries that lower your credit score. Check your bank eligibility matches for free on our platform first:\n👉 clickindiacapital.in`,
-    `Hello, Sameer Krishnan here. We offer founder-led advisory services to secure the best loan match. \nCheck your borrow readiness score and get your tailored document checklist here:\n👉 clickindiacapital.in`
+    `Hello, this is the Advisory Lead from Click India Capital. \nWe help business owners and salaried professionals check their actual bank loan eligibility and fix profile issues before applying to prime lenders like HDFC and SBI. \nIf you are planning to apply for a Home, Business, or Vehicle loan soon, you can run a free 2-minute eligibility check on our platform:\n👉 clickindiacapital.in`,
+    `Hi! Advisory Team from Click India Capital. \nBefore applying for any Home, Business, or Vehicle loan, it is crucial to check your bank eligibility score to avoid standard rejections. \nCheck your readiness and get your matched banks for free in 2 minutes here:\n👉 clickindiacapital.in`,
+    `Greetings! This is the Advisory Team from Click India Capital. \nWe help borrowers check and fix their bank loan eligibility profiles before submitting to HDFC or SBI. \nRun a quick, free 2-minute borrow readiness check here:\n👉 clickindiacapital.in`,
+    `Hello! Advisory Lead here. Confused about bank eligibility criteria? \nAt Click India Capital, we evaluate your financial profile against 20+ lenders to check matches. \nStart your free eligibility check here in 2 minutes:\n👉 clickindiacapital.in`,
+    `Hi, this is the Advisory Team from Click India Capital. \nDid you know that 30% of loans get rejected due to basic profile errors? We help you detect and correct them beforehand. \nFind your eligible lenders instantly for free:\n👉 clickindiacapital.in`,
+    `Greetings! Advisory Team here from Click India Capital. \nWe specialize in home, vehicle, and business loan advisory. Get a clear view of your loan health score before approaching banks. \nCheck your readiness today:\n👉 clickindiacapital.in`,
+    `Hi there! Advisory Lead here from Click India Capital. Looking for a home, business, or auto loan? \nAvoid multiple hard inquiries that lower your credit score. Check your bank eligibility matches for free on our platform first:\n👉 clickindiacapital.in`,
+    `Hello! We offer expert-led advisory services to secure the best loan match at Click India Capital. \nCheck your borrow readiness score and get your tailored document checklist here:\n👉 clickindiacapital.in`
   ];
 
   // Initial load

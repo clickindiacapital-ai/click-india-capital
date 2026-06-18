@@ -82,9 +82,7 @@ export default function Legal({ type }: LegalPageProps) {
           <p>At Click India Capital, we strive to provide the best possible service. However, if you have any complaints or grievances regarding our services, please contact our Grievance Redressal Officer.</p>
           <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 mt-6">
             <h4 className="font-bold mb-2">Grievance Redressal Officer:</h4>
-            <p>Name: Sameer Krishnan</p>
             <p>Email: grievances@clickindiacapital.in</p>
-            <p>Phone: +91 9995959055</p>
             <p>Address: Kerala, India</p>
           </div>
           <p className="mt-4">We aim to resolve all grievances within 7-14 working days of receipt.</p>

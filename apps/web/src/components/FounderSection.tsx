@@ -19,8 +19,8 @@ export default function FounderSection() {
               <div className="absolute inset-0 bg-blue-600 rounded-[2rem] transform rotate-3 scale-105 opacity-10"></div>
               <div className="bg-white p-2 rounded-[2rem] shadow-xl relative z-10 border border-slate-100 aspect-[3/4] flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/founder.jpg" 
-                  alt="Founder of Click India Capital" 
+                  src="/advisory_lead.png" 
+                  alt="Advisory Team of Click India Capital" 
                   className="w-full h-full object-cover rounded-[1.5rem]"
                 />
               </div>

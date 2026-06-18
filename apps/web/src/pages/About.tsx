@@ -80,7 +80,7 @@ export default function About() {
             <div className="lg:col-span-5 flex justify-center lg:justify-end">
               <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full overflow-hidden border-8 border-white shadow-2xl">
                 <img 
-                  src="/founder.jpg" 
+                  src="/advisory_lead.png" 
                   alt={t('about.founderName')}
                   className="w-full h-full object-cover object-top"
                 />

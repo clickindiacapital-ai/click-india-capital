@@ -196,7 +196,7 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
                             onClick={() => {
                               const cleanPhone = customer.phone.replace(/[^0-9]/g, '');
                               const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-                              const greeting = `Hello ${customer.name}, Sameer here from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
+                              const greeting = `Hello ${customer.name}, this is the advisory team from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
                               window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(greeting)}`, '_blank');
                             }}
                             className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors flex items-center justify-center"
