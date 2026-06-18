@@ -1,11 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Filter, MoreVertical, Loader2 } from 'lucide-react';
-import { customerService } from '../services/supabaseClient';
+import supabase, { customerService } from '../services/supabaseClient';
 
 export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id: string) => void }) {
   const [customers, setCustomers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  // Add Customer Modal States
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [employmentType, setEmploymentType] = useState('Salaried');
+  const [monthlyIncome, setMonthlyIncome] = useState('');
+  const [addAsLead, setAddAsLead] = useState(false);
+  const [loanType, setLoanType] = useState('Home Loan');
+  const [loanAmount, setLoanAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddCustomerSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !phone) {
+      alert('Name and Phone are required.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const customerId = 'cust_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+      
+      const { error: customerError } = await supabase
+        .from('customers')
+        .insert([{
+          id: customerId,
+          name,
+          phone,
+          email: email || `manual_${phone}@clickindia.in`,
+          employment_type: employmentType,
+          monthly_income: parseFloat(monthlyIncome) || 0
+        }]);
+
+      if (customerError) throw customerError;
+
+      if (addAsLead) {
+        const { error: leadError } = await supabase
+          .from('leads')
+          .insert([{
+            customer_id: customerId,
+            name,
+            email: email || `manual_${phone}@clickindia.in`,
+            phone,
+            loan_type: loanType,
+            loan_amount: parseFloat(loanAmount) || 0,
+            status: 'NEW',
+            source: 'Manual Import'
+          }]);
+        if (leadError) throw leadError;
+      }
+
+      setName('');
+      setPhone('');
+      setEmail('');
+      setEmploymentType('Salaried');
+      setMonthlyIncome('');
+      setAddAsLead(false);
+      setLoanType('Home Loan');
+      setLoanAmount('');
+      setShowAddModal(false);
+
+      await fetchCustomers();
+      alert('Customer successfully added!');
+    } catch (err: any) {
+      console.error(err);
+      alert('Failed to add customer: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     fetchCustomers();
@@ -30,7 +101,10 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
           <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
           <p className="text-slate-500 text-sm mt-1">Manage your onboarded clients and view their history.</p>
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm">
+        <button 
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm"
+        >
           <Plus size={18} />
           <span>Add Customer</span>
         </button>
@@ -145,6 +219,145 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
           </div>
         </div>
       </div>
+
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200" onClick={() => setShowAddModal(false)}>
+          <div className="bg-white rounded-[32px] border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="px-8 py-6 border-b border-slate-100 flex-shrink-0 bg-slate-50">
+              <h3 className="font-black text-slate-900 text-lg">Add Customer Profile</h3>
+              <p className="text-slate-500 text-xs mt-1">Manually enter lead information received via email or other channels.</p>
+            </div>
+            
+            <form onSubmit={handleAddCustomerSubmit} className="flex-1 overflow-y-auto p-8 space-y-6">
+              {/* Personal Info */}
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">1. Personal Information</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Full Name *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. John Doe"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Phone Number *</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="e.g. 9876543210"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="e.g. john@example.com"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold"
+                  />
+                </div>
+              </div>
+
+              {/* Financial Info */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Employment & Income</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Employment Type</label>
+                    <select
+                      value={employmentType}
+                      onChange={(e) => setEmploymentType(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold bg-white"
+                    >
+                      <option value="Salaried">Salaried</option>
+                      <option value="Self-Employed">Self-Employed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Monthly Net Income (₹)</label>
+                    <input 
+                      type="number" 
+                      value={monthlyIncome}
+                      onChange={(e) => setMonthlyIncome(e.target.value)}
+                      placeholder="e.g. 50000"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Lead Toggle and Loan Info */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest font-bold">3. Create Active Loan Application</label>
+                  <input 
+                    type="checkbox"
+                    checked={addAsLead}
+                    onChange={(e) => setAddAsLead(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                  />
+                </div>
+                
+                {addAsLead && (
+                  <div className="grid grid-cols-2 gap-4 pt-2 animate-in slide-in-from-top-2 duration-200">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Loan Type</label>
+                      <select
+                        value={loanType}
+                        onChange={(e) => setLoanType(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold bg-white"
+                      >
+                        <option value="Home Loan">Home Loan</option>
+                        <option value="Business Loan">Business Loan</option>
+                        <option value="Vehicle Loan">Vehicle Loan</option>
+                        <option value="Personal Loan">Personal Loan</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Desired Loan Amount (₹)</label>
+                      <input 
+                        type="number" 
+                        value={loanAmount}
+                        onChange={(e) => setLoanAmount(e.target.value)}
+                        placeholder="e.g. 1500000"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-100 text-xs font-semibold"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 justify-end pt-6 border-t border-slate-100 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-5 py-2.5 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-bold text-slate-600 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-colors"
+                >
+                  {isSubmitting ? 'Adding...' : 'Save Customer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
