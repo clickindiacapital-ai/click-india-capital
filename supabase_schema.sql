@@ -348,3 +348,21 @@ CREATE POLICY "Client update own documents" ON public.customer_documents
             AND customers.email = auth.jwt() ->> 'email'
         )
     );
+
+-- 12. Global Do Not Contact (Blocklist) Table
+DROP TABLE IF EXISTS public.do_not_contact CASCADE;
+CREATE TABLE public.do_not_contact (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    phone TEXT UNIQUE NOT NULL,
+    reason TEXT DEFAULT 'OPT_OUT',
+    source TEXT DEFAULT 'CRM_MANUAL'
+);
+
+-- RLS Policies for DNC Table
+ALTER TABLE public.do_not_contact ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users on DNC" ON public.do_not_contact
+    FOR ALL TO authenticated
+    USING (true)
+    WITH CHECK (true);
+

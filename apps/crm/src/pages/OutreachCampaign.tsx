@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Share2, Plus, Trash2, Send, AlertTriangle, CheckCircle, Smartphone, Users, HelpCircle, RefreshCw, X } from 'lucide-react';
+import { Share2, Plus, Trash2, Send, AlertTriangle, CheckCircle, Smartphone, Users, HelpCircle, RefreshCw, X, ShieldAlert, Sparkles, Clock } from 'lucide-react';
+import supabase from '../services/supabaseClient';
 
 interface Prospect {
   phone: string;
-  status: 'PENDING' | 'SENT';
+  status: 'PENDING' | 'SENT_1' | 'SENT_2' | 'ARCHIVED_NO_REPLY';
   sentAt?: string;
 }
 
@@ -20,42 +21,82 @@ export default function OutreachCampaign() {
   const [newCampaignName, setNewCampaignName] = useState<string>('');
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
   const [rawNumbers, setRawNumbers] = useState<string>('');
-  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'SENT'>('ALL');
+  const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'SENT_1' | 'SENT_2' | 'ARCHIVED_NO_REPLY'>('ALL');
   
   // Daily tracker state
   const [dailySentCount, setDailySentCount] = useState<number>(0);
   const maxDailyLimit = 80;
 
+  // Blocklist and cooldown states
+  const [blockedPhones, setBlockedPhones] = useState<string[]>([]);
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
+  const [importSummary, setImportSummary] = useState<{
+    show: boolean;
+    processed: number;
+    duplicates: number;
+    blocked: number;
+    imported: number;
+  } | null>(null);
+
+  // Local system hour check for office hours lock (10 AM to 5 PM)
+  const [currentHour, setCurrentHour] = useState<number>(new Date().getHours());
+
+  useEffect(() => {
+    const hourTimer = setInterval(() => {
+      setCurrentHour(new Date().getHours());
+    }, 60000);
+    return () => clearInterval(hourTimer);
+  }, []);
+
+  const isLockedTime = currentHour < 10 || currentHour >= 17;
+
   const defaultTemplates = [
     `Hello, Sameer Krishnan here from Click India Capital. \nWe help business owners and salaried professionals check their actual bank loan eligibility and fix profile issues before applying to prime lenders like HDFC and SBI. \nIf you are planning to apply for a Home, Business, or Vehicle loan soon, you can run a free 2-minute eligibility check on our platform:\n👉 clickindiacapital.in`,
-    `Hi there! Sameer Krishnan from Click India Capital. \nBefore applying for any Home, Business, or Vehicle loan, it is crucial to check your bank eligibility score to avoid standard rejections. \nCheck your readiness and get your matched banks for free in 2 minutes here:\n👉 clickindiacapital.in`,
-    `Greetings! This is Sameer Krishnan from Click India Capital. \nWe help borrowers check and fix their bank loan eligibility profiles before submitting to HDFC or SBI. \nRun a quick, free 2-minute borrow readiness check here:\n👉 clickindiacapital.in`
+    `Hi! Sameer Krishnan from Click India Capital. \nBefore applying for any Home, Business, or Vehicle loan, it is crucial to check your bank eligibility score to avoid standard rejections. \nCheck your readiness and get your matched banks for free in 2 minutes here:\n👉 clickindiacapital.in`,
+    `Greetings! This is Sameer Krishnan from Click India Capital. \nWe help borrowers check and fix their bank loan eligibility profiles before submitting to HDFC or SBI. \nRun a quick, free 2-minute borrow readiness check here:\n👉 clickindiacapital.in`,
+    `Hello! Sameer Krishnan here. Confused about bank eligibility criteria? \nAt Click India Capital, we evaluate your financial profile against 20+ lenders to check matches. \nStart your free eligibility check here in 2 minutes:\n👉 clickindiacapital.in`,
+    `Hi, this is Sameer from Click India Capital. \nDid you know that 30% of loans get rejected due to basic profile errors? We help you detect and correct them beforehand. \nFind your eligible lenders instantly for free:\n👉 clickindiacapital.in`,
+    `Greetings! Sameer Krishnan here from Click India Capital. \nWe specialize in home, vehicle, and business loan advisory. Get a clear view of your loan health score before approaching banks. \nCheck your readiness today:\n👉 clickindiacapital.in`,
+    `Hi there! Sameer here. Looking for a home, business, or auto loan? \nAvoid multiple hard inquiries that lower your credit score. Check your bank eligibility matches for free on our platform first:\n👉 clickindiacapital.in`,
+    `Hello, Sameer Krishnan here. We offer founder-led advisory services to secure the best loan match. \nCheck your borrow readiness score and get your tailored document checklist here:\n👉 clickindiacapital.in`
   ];
 
   // Initial load
   useEffect(() => {
+    fetchBlocklist();
+
     const savedCampaigns = localStorage.getItem('crm_outreach_campaigns');
     if (savedCampaigns) {
       try {
         const parsed = JSON.parse(savedCampaigns);
         
         // Upgrade campaign models if they use single 'template' instead of 'templates'
+        // And upgrade prospect status 'SENT' to 'SENT_1'
         const upgraded = parsed.map((c: any) => {
+          let prospects = c.prospects || [];
+          prospects = prospects.map((p: any) => {
+            if (p.status === 'SENT') {
+              return { ...p, status: 'SENT_1' };
+            }
+            return p;
+          });
+
           if (c.template && !c.templates) {
             return {
               id: c.id,
               name: c.name,
-              prospects: c.prospects || [],
+              prospects,
               templates: [c.template, ...defaultTemplates.slice(1)]
             };
           }
           if (!c.templates || c.templates.length === 0) {
             return {
               ...c,
+              prospects,
               templates: [...defaultTemplates]
             };
           }
-          return c;
+          return { ...c, prospects };
         });
 
         setCampaigns(upgraded);
@@ -97,6 +138,41 @@ export default function OutreachCampaign() {
     }
   }, []);
 
+  // Cooldown countdown effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCooldowns(prev => {
+        const next = { ...prev };
+        let changed = false;
+        Object.keys(next).forEach(phone => {
+          if (next[phone] > 0) {
+            next[phone] -= 1;
+            changed = true;
+          } else {
+            delete next[phone];
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchBlocklist = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('do_not_contact')
+        .select('phone');
+      if (error) throw error;
+      if (data) {
+        setBlockedPhones(data.map((item: any) => item.phone));
+      }
+    } catch (err) {
+      console.error('Failed to fetch blocklist:', err);
+    }
+  };
+
   // Save campaigns helper
   const saveCampaigns = (updatedCampaigns: Campaign[]) => {
     setCampaigns(updatedCampaigns);
@@ -134,8 +210,8 @@ export default function OutreachCampaign() {
     }
   };
 
-  // Import prospects
-  const handleImportProspects = () => {
+  // Import prospects with blocklist check
+  const handleImportProspects = async () => {
     if (!rawNumbers.trim() || !activeCampaign) return;
     
     // Parse input
@@ -145,33 +221,65 @@ export default function OutreachCampaign() {
       .filter(num => num.length >= 10); // Minimum 10 digits
       
     // Deduplicate
-    const uniqueNumbers = Array.from(new Set(numbersArray));
+    const uniqueIncoming = Array.from(new Set(numbersArray));
+    const totalProcessed = uniqueIncoming.length;
 
-    // Map to Prospect format
-    const existingPhones = new Set(activeCampaign.prospects.map(p => p.phone));
-    const newProspects: Prospect[] = uniqueNumbers
-      .filter(phone => !existingPhones.has(phone))
-      .map(phone => ({
-        phone,
-        status: 'PENDING'
-      }));
+    // Standardize to prepend country code if 10 digits
+    const formattedIncoming = uniqueIncoming.map(num => num.length === 10 ? '91' + num : num);
 
-    if (newProspects.length === 0) {
-      alert('No new unique phone numbers were found to import.');
-      return;
+    // Get latest blocklist from DB
+    let currentBlocklist: string[] = [];
+    try {
+      const { data, error } = await supabase
+        .from('do_not_contact')
+        .select('phone');
+      if (!error && data) {
+        currentBlocklist = data.map((item: any) => item.phone);
+        setBlockedPhones(currentBlocklist);
+      }
+    } catch (e) {
+      console.error(e);
     }
 
-    const updatedProspects = [...activeCampaign.prospects, ...newProspects];
-    const updatedCampaigns = campaigns.map(c => {
-      if (c.id === selectedCampaignId) {
-        return { ...c, prospects: updatedProspects };
+    const dncSet = new Set(currentBlocklist);
+    const existingPhones = new Set(activeCampaign.prospects.map(p => p.phone));
+
+    let duplicatesCount = 0;
+    let dncCount = 0;
+    const cleanProspectsToImport: Prospect[] = [];
+
+    formattedIncoming.forEach(phone => {
+      if (existingPhones.has(phone)) {
+        duplicatesCount++;
+      } else if (dncSet.has(phone)) {
+        dncCount++;
+      } else {
+        cleanProspectsToImport.push({
+          phone,
+          status: 'PENDING'
+        });
       }
-      return c;
     });
 
-    saveCampaigns(updatedCampaigns);
+    if (cleanProspectsToImport.length > 0) {
+      const updatedProspects = [...activeCampaign.prospects, ...cleanProspectsToImport];
+      const updatedCampaigns = campaigns.map(c => {
+        if (c.id === selectedCampaignId) {
+          return { ...c, prospects: updatedProspects };
+        }
+        return c;
+      });
+      saveCampaigns(updatedCampaigns);
+    }
+
     setRawNumbers('');
-    alert(`Successfully imported ${newProspects.length} new prospects!`);
+    setImportSummary({
+      show: true,
+      processed: totalProcessed,
+      duplicates: duplicatesCount,
+      blocked: dncCount,
+      imported: cleanProspectsToImport.length
+    });
   };
 
   // Update specific Template variant
@@ -219,7 +327,7 @@ export default function OutreachCampaign() {
     saveCampaigns(updatedCampaigns);
   };
 
-  // Send WhatsApp Link Click with rotational template
+  // Send WhatsApp Link Click with rotational template & 2-strike system
   const handleSendWhatsApp = (phone: string, indexInList: number) => {
     if (!activeCampaign) return;
     
@@ -240,7 +348,13 @@ export default function OutreachCampaign() {
       if (c.id === selectedCampaignId) {
         const updatedProspects = c.prospects.map(p => {
           if (p.phone === phone) {
-            return { ...p, status: 'SENT' as const, sentAt: new Date().toISOString() };
+            let nextStatus: Prospect['status'] = 'SENT_1';
+            if (p.status === 'SENT_1') {
+              nextStatus = 'SENT_2';
+            } else if (p.status === 'SENT_2') {
+              nextStatus = 'ARCHIVED_NO_REPLY';
+            }
+            return { ...p, status: nextStatus, sentAt: new Date().toISOString() };
           }
           return p;
         });
@@ -255,6 +369,10 @@ export default function OutreachCampaign() {
     const newCount = dailySentCount + 1;
     setDailySentCount(newCount);
     localStorage.setItem('crm_outreach_daily_sent', JSON.stringify({ date: today, count: newCount }));
+
+    // Start a random cooldown timer (30 to 90 seconds)
+    const randomCooldown = Math.floor(Math.random() * (90 - 30 + 1)) + 30;
+    setCooldowns(prev => ({ ...prev, [phone]: randomCooldown }));
   };
 
   // Reset Campaign progress
@@ -274,13 +392,20 @@ export default function OutreachCampaign() {
 
   // Stats calculation
   const totalProspects = activeCampaign?.prospects.length || 0;
-  const sentCount = activeCampaign?.prospects.filter(p => p.status === 'SENT').length || 0;
+  const sentCount = activeCampaign?.prospects.filter(p => p.status !== 'PENDING').length || 0;
   const pendingCount = totalProspects - sentCount;
+
+  // Spam opt-out rate calculation
+  const campaignPhones = activeCampaign?.prospects.map(p => p.phone) || [];
+  const blockedCountInCampaign = campaignPhones.filter(phone => blockedPhones.includes(phone)).length;
+  const optOutRate = campaignPhones.length > 0 ? (blockedCountInCampaign / campaignPhones.length) * 100 : 0;
 
   // Filtered list
   const displayProspects = (activeCampaign?.prospects || []).filter(p => {
     if (filter === 'PENDING') return p.status === 'PENDING';
-    if (filter === 'SENT') return p.status === 'SENT';
+    if (filter === 'SENT_1') return p.status === 'SENT_1';
+    if (filter === 'SENT_2') return p.status === 'SENT_2';
+    if (filter === 'ARCHIVED_NO_REPLY') return p.status === 'ARCHIVED_NO_REPLY';
     return true;
   });
 
@@ -323,6 +448,19 @@ export default function OutreachCampaign() {
 
       {/* Warning and Stats Panel */}
       <div className="p-8 pb-4 flex-shrink-0 space-y-6">
+        {/* Office Hours Safety Lock Banner */}
+        {isLockedTime && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-4 items-start shadow-sm animate-in slide-in-from-top-2 duration-300">
+            <Clock className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
+            <div>
+              <h4 className="font-bold text-red-900 text-sm">🕒 Cold Outreach locked (Outside Office Hours)</h4>
+              <p className="text-red-700 text-xs mt-1 leading-relaxed">
+                Cold outreach campaigns are locked outside of active office hours (**10:00 AM – 5:00 PM**) to preserve account reputation and prevent late-night spam reports. Outreach sending is temporarily disabled.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Safety Alert Banner */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-4 items-start shadow-sm">
           <AlertTriangle className="text-amber-500 flex-shrink-0 mt-0.5" size={20} />
@@ -335,7 +473,7 @@ export default function OutreachCampaign() {
         </div>
 
         {/* Campaign Metrics & Daily Tracker */}
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-5 gap-6">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
               <Users size={22} />
@@ -386,6 +524,30 @@ export default function OutreachCampaign() {
               <div 
                 className={`h-full rounded-full transition-all duration-500 ${dailySentCount >= maxDailyLimit ? 'bg-red-500' : dailySentCount >= 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
                 style={{ width: `${Math.min((dailySentCount / maxDailyLimit) * 100, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Spam Risk Meter */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Spam Risk Rate</p>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className={`text-2xl font-black ${optOutRate >= 10 ? 'text-red-650' : optOutRate >= 5 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    {optOutRate.toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-slate-400 font-semibold">opt-out</span>
+                </div>
+              </div>
+              <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full ${optOutRate >= 10 ? 'bg-red-100 text-red-755' : optOutRate >= 5 ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                {optOutRate >= 10 ? 'High Risk' : optOutRate >= 5 ? 'Medium Risk' : 'Low Risk'}
+              </span>
+            </div>
+            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-3">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${optOutRate >= 10 ? 'bg-red-500' : optOutRate >= 5 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                style={{ width: `${Math.min(optOutRate, 100)}%` }}
               />
             </div>
           </div>
@@ -474,13 +636,13 @@ export default function OutreachCampaign() {
               </span>
             </div>
             <div className="flex gap-2">
-              {['ALL', 'PENDING', 'SENT'].map(f => (
+              {['ALL', 'PENDING', 'SENT_1', 'SENT_2', 'ARCHIVED_NO_REPLY'].map(f => (
                 <button
                   key={f}
                   onClick={() => setFilter(f as any)}
                   className={`px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors ${filter === f ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                 >
-                  {f}
+                  {f === 'SENT_1' ? 'INTRO' : f === 'SENT_2' ? 'FOLLOW-UP' : f === 'ARCHIVED_NO_REPLY' ? 'ARCHIVED' : f}
                 </button>
               ))}
               <button
@@ -515,10 +677,18 @@ export default function OutreachCampaign() {
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {displayProspects.map((prospect, idx) => {
                     const assignedVariantIdx = activeCampaign ? (idx % activeCampaign.templates.length) : 0;
+                    const isBlocked = blockedPhones.includes(prospect.phone);
+                    const cooldownLeft = cooldowns[prospect.phone] || 0;
+                    
                     return (
-                      <tr key={prospect.phone} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-3.5 px-6 font-semibold text-slate-800 font-mono">
-                          {prospect.phone}
+                      <tr key={prospect.phone} className={`hover:bg-slate-50/50 transition-colors ${isBlocked ? 'bg-red-50/30' : ''}`}>
+                        <td className="py-3.5 px-6 font-semibold text-slate-800 font-mono flex items-center gap-2">
+                          <span>{prospect.phone}</span>
+                          {isBlocked && (
+                            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded-md text-[8px] font-bold uppercase flex items-center gap-0.5">
+                              <ShieldAlert size={8} /> DNC Blocked
+                            </span>
+                          )}
                         </td>
                         <td className="py-3.5 px-6">
                           <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-[9px] font-bold">
@@ -526,24 +696,73 @@ export default function OutreachCampaign() {
                           </span>
                         </td>
                         <td className="py-3.5 px-6">
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${prospect.status === 'SENT' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
-                            {prospect.status === 'SENT' ? 'Messaged' : 'Pending'}
+                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                            prospect.status === 'SENT_1' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : prospect.status === 'SENT_2'
+                                ? 'bg-indigo-100 text-indigo-850'
+                                : prospect.status === 'ARCHIVED_NO_REPLY'
+                                  ? 'bg-rose-100 text-rose-800'
+                                  : 'bg-slate-100 text-slate-600'
+                          }`}>
+                            {prospect.status === 'SENT_1' 
+                              ? 'Intro Sent' 
+                              : prospect.status === 'SENT_2'
+                                ? 'Follow-Up Sent'
+                                : prospect.status === 'ARCHIVED_NO_REPLY'
+                                  ? 'Archived (No Reply)'
+                                  : 'Pending'}
                           </span>
                         </td>
                         <td className="py-3.5 px-6 text-right">
                           <button
                             onClick={() => handleSendWhatsApp(prospect.phone, idx)}
-                            disabled={dailySentCount >= maxDailyLimit && prospect.status === 'PENDING'}
+                            disabled={
+                              isBlocked ||
+                              prospect.status === 'ARCHIVED_NO_REPLY' ||
+                              isLockedTime ||
+                              cooldownLeft > 0 ||
+                              (dailySentCount >= maxDailyLimit && prospect.status === 'PENDING')
+                            }
                             className={`px-3 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-wider inline-flex items-center gap-1.5 transition-all ${
-                              prospect.status === 'SENT'
-                                ? 'bg-slate-100 text-slate-500 hover:bg-slate-200'
-                                : dailySentCount >= maxDailyLimit
-                                  ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                                  : 'bg-emerald-600 text-white shadow-sm shadow-emerald-700/20 hover:bg-emerald-500'
+                              isBlocked
+                                ? 'bg-red-50 text-red-400 border border-red-100 cursor-not-allowed'
+                                : prospect.status === 'ARCHIVED_NO_REPLY'
+                                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                  : isLockedTime
+                                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    : cooldownLeft > 0
+                                      ? 'bg-amber-50 text-amber-600 border border-amber-200 animate-pulse'
+                                      : prospect.status === 'SENT_2'
+                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                        : prospect.status === 'SENT_1'
+                                          ? 'bg-indigo-650 text-white shadow-sm shadow-indigo-700/20 hover:bg-indigo-500'
+                                          : dailySentCount >= maxDailyLimit
+                                            ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
+                                            : 'bg-emerald-600 text-white shadow-sm shadow-emerald-700/20 hover:bg-emerald-500'
                             }`}
                           >
-                            <Send size={10} />
-                            <span>{prospect.status === 'SENT' ? 'Message Again' : 'Send WhatsApp'}</span>
+                            {cooldownLeft > 0 ? (
+                              <>
+                                <Clock size={10} />
+                                <span>Cooldown: {cooldownLeft}s</span>
+                              </>
+                            ) : (
+                              <>
+                                <Send size={10} />
+                                <span>
+                                  {isBlocked 
+                                    ? 'Blocked' 
+                                    : prospect.status === 'SENT_1' 
+                                      ? 'Send Follow-Up' 
+                                      : prospect.status === 'SENT_2' || prospect.status === 'ARCHIVED_NO_REPLY'
+                                        ? 'Archived' 
+                                        : isLockedTime
+                                          ? 'Time Locked'
+                                          : 'Send Intro'}
+                                </span>
+                              </>
+                            )}
                           </button>
                         </td>
                       </tr>
@@ -589,6 +808,53 @@ export default function OutreachCampaign() {
           </div>
         </div>
       )}
+
+      {/* Import Summary Modal */}
+      {importSummary && importSummary.show && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 animate-in fade-in duration-200">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xl w-[400px] space-y-5 animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h3 className="font-black text-slate-950 text-base uppercase tracking-tight flex items-center gap-2">
+                <Sparkles className="text-blue-600" size={18} />
+                <span>Import Summary</span>
+              </h3>
+              <button 
+                onClick={() => setImportSummary(prev => prev ? { ...prev, show: false } : null)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="space-y-3.5 text-xs text-slate-600">
+              <div className="flex justify-between font-semibold py-1">
+                <span>Total Processed:</span>
+                <span className="font-mono text-slate-900">{importSummary.processed}</span>
+              </div>
+              <div className="flex justify-between font-semibold py-1">
+                <span>Duplicates Skipped:</span>
+                <span className="font-mono text-amber-600">{importSummary.duplicates}</span>
+              </div>
+              <div className="flex justify-between font-semibold py-1">
+                <span>DNC Blocklist Filtered:</span>
+                <span className="font-mono text-red-500 font-bold">{importSummary.blocked}</span>
+              </div>
+              <div className="flex justify-between font-semibold py-1 border-t border-slate-100 pt-3 text-sm font-bold text-slate-800">
+                <span>Successfully Imported:</span>
+                <span className="font-mono text-emerald-600 font-black">{importSummary.imported}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setImportSummary(prev => prev ? { ...prev, show: false } : null)}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

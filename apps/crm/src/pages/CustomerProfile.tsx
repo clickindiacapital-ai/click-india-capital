@@ -140,6 +140,53 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
     }
   };
 
+  const handleAddToDNC = async () => {
+    if (!customer) return;
+    if (!confirm(`Are you sure you want to add ${customer.name} (${customer.phone}) to the global Do Not Contact (DNC) list?`)) {
+      return;
+    }
+
+    try {
+      // 1. Insert into do_not_contact
+      const { error: dncError } = await supabase
+        .from('do_not_contact')
+        .insert([{ 
+          phone: customer.phone, 
+          reason: 'OPT_OUT', 
+          source: 'CRM_MANUAL' 
+        }]);
+
+      if (dncError && dncError.code !== '23505') {
+        throw dncError;
+      }
+
+      // 2. Update all active leads for this customer to REJECTED
+      const { error: leadsError } = await supabase
+        .from('leads')
+        .update({ status: 'REJECTED' })
+        .eq('customer_id', customerId);
+
+      if (leadsError) throw leadsError;
+
+      // 3. Write event to customer_timeline
+      const { error: timelineError } = await supabase
+        .from('customer_timeline')
+        .insert([{
+          customer_id: customerId,
+          event_type: 'OPTED_OUT',
+          description: 'Customer requested to STOP outreach. Phone added to global DNC blocklist by Sameer.'
+        }]);
+
+      if (timelineError) throw timelineError;
+
+      alert(`${customer.name} has been added to the Do Not Contact blocklist.`);
+      await fetchCustomerData();
+    } catch (err: any) {
+      console.error('Failed to add to DNC:', err);
+      alert('Failed to add to DNC: ' + err.message);
+    }
+  };
+
   const handleUpdateDocStatus = async (docId: string, newStatus: string, docType: string) => {
     try {
       const { error } = await supabase
@@ -234,17 +281,26 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
             </div>
           </div>
           
-          <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Borrow Readiness</p>
-            <div className="flex items-center gap-3">
-              <div className="text-3xl font-black text-slate-900">
-                {customer.borrow_readiness_score || '--'}<span className="text-lg text-slate-400">/100</span>
+          <div className="text-right flex flex-col items-end gap-3">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Borrow Readiness</p>
+              <div className="flex items-center gap-3 justify-end">
+                <div className="text-3xl font-black text-slate-900">
+                  {customer.borrow_readiness_score || '--'}<span className="text-lg text-slate-400">/100</span>
+                </div>
+                <div className={`w-3 h-3 rounded-full ${
+                  (customer.borrow_readiness_score || 0) >= 80 ? 'bg-emerald-500' :
+                  (customer.borrow_readiness_score || 0) >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                }`} />
               </div>
-              <div className={`w-3 h-3 rounded-full ${
-                (customer.borrow_readiness_score || 0) >= 80 ? 'bg-emerald-500' :
-                (customer.borrow_readiness_score || 0) >= 50 ? 'bg-orange-500' : 'bg-red-500'
-              }`} />
             </div>
+            <button
+              onClick={handleAddToDNC}
+              className="flex items-center gap-1.5 bg-red-50 hover:bg-red-100 text-red-650 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border border-red-200 shadow-sm cursor-pointer"
+              title="Add customer to global Do Not Contact (DNC) list"
+            >
+              <Shield size={14} /> Add to Blocklist
+            </button>
           </div>
         </div>
       </div>

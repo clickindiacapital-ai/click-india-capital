@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { 
+import supabase, { 
   communicationService, 
   leadService, 
   intelligenceService,
@@ -138,6 +138,59 @@ const CommunicationCenter = () => {
     await handleSendMessage();
   };
 
+  const handleAddToDNC = async () => {
+    if (!activeLead) return;
+    if (!confirm(`Are you sure you want to add ${activeLead.phone} to the global Do Not Contact (DNC) list? This will also mark their lead status as REJECTED.`)) {
+      return;
+    }
+
+    try {
+      // 1. Insert into do_not_contact
+      const { error: dncError } = await supabase
+        .from('do_not_contact')
+        .insert([{ 
+          phone: activeLead.phone, 
+          reason: 'OPT_OUT', 
+          source: 'CRM_MANUAL' 
+        }]);
+
+      if (dncError && dncError.code !== '23505') {
+        throw dncError;
+      }
+
+      // 2. Update lead status to REJECTED
+      const { error: leadError } = await supabase
+        .from('leads')
+        .update({ status: 'REJECTED' })
+        .eq('id', activeLead.id!);
+
+      if (leadError) throw leadError;
+
+      // 3. Write event to customer_timeline
+      if (activeLead.customer_id) {
+        await supabase
+          .from('customer_timeline')
+          .insert([{
+            customer_id: activeLead.customer_id,
+            event_type: 'OPTED_OUT',
+            description: 'Prospect requested to STOP receiving outreach. Phone added to global DNC blocklist, and lead rejected.'
+          }]);
+      }
+
+      alert(`${activeLead.phone} has been added to the Do Not Contact blocklist.`);
+
+      // Update active lead locally
+      setActiveLead(prev => prev ? { ...prev, status: 'REJECTED' } : null);
+
+      // Refresh leads list
+      const { data } = await leadService.getAllLeads();
+      setLeads(data || []);
+    } catch (err: any) {
+      console.error('Failed to add to DNC:', err);
+      alert('Failed to add to DNC: ' + err.message);
+    }
+  };
+
   const handleVerifyPayment = async (submissionId: string, status: 'APPROVED' | 'REJECTED') => {
     try {
       // Use system admin ID for pilot
@@ -269,6 +322,14 @@ const CommunicationCenter = () => {
                 </div>
               </div>
               <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleAddToDNC}
+                  className="px-3 py-1.5 bg-red-950/40 border border-red-500/30 hover:bg-red-600 text-red-400 hover:text-white rounded-xl transition-all text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm shadow-red-950/20"
+                  title="Add to Do Not Contact (DNC) list"
+                >
+                  <ShieldAlert size={12} />
+                  <span>DNC</span>
+                </button>
                 <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl transition-all text-gray-400">
                   <ShieldAlert size={18} />
                 </button>

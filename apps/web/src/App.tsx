@@ -1,7 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import Layout from './components/Layout';
 import SEO from './components/SEO';
+import ComingSoon from './pages/ComingSoon';
+
+/*
+// Original routes (uncomment to restore site)
+import Layout from './components/Layout';
 import Home from './pages/Home';
 import EligibilityCheck from './pages/EligibilityCheck';
 import EmiCalculator from './pages/EmiCalculator';
@@ -13,37 +17,17 @@ import Contact from './pages/Contact';
 import Legal from './pages/Legal';
 import Advisory from './pages/Advisory';
 import ClientPortal from './pages/ClientPortal';
+*/
 
 export default function App() {
   return (
     <HelmetProvider>
       <SEO />
       <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="eligibility" element={<EligibilityCheck />} />
-        <Route path="calculator" element={<EmiCalculator />} />
-        <Route path="products" element={<LoanProducts />} />
-        <Route path="about" element={<About />} />
-        <Route path="insights" element={<Insights />} />
-        <Route path="insights/:id" element={<InsightDetail />} />
-        <Route path="contact" element={<Contact />} />
-        <Route path="advisory" element={<Advisory />} />
-        {/* Disable Customer Portal temporarily */}
-        {/* <Route path="portal" element={<ClientPortal />} /> */}
-        <Route path="assistant" element={<Home />} />
-        
-        {/* Legal Routes */}
-        <Route path="privacy" element={<Legal type="privacy" />} />
-        <Route path="terms" element={<Legal type="terms" />} />
-        <Route path="disclaimer" element={<Legal type="disclaimer" />} />
-        <Route path="consent" element={<Legal type="consent" />} />
-        <Route path="grievance" element={<Legal type="grievance" />} />
-        <Route path="data-deletion" element={<Legal type="data-deletion" />} />
-      </Route>
+        {/* Render Coming Soon for all pages */}
+        <Route path="*" element={<ComingSoon />} />
       </Routes>
     </HelmetProvider>
   );
 }
 
-// Vercel deployment trigger
