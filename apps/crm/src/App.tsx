@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, FileText, Settings, Bell, Search, MessageSquare, ShieldCheck, BookOpen, Smartphone } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, Settings, Bell, Search, MessageSquare, ShieldCheck, BookOpen, Smartphone, DollarSign, Calendar } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import CRMLogin from './components/CRMLogin';
 import CommunicationCenter from './pages/CommunicationCenter';
@@ -10,6 +10,9 @@ import PolicyManager from './pages/PolicyManager';
 import BlogManager from './pages/BlogManager';
 import OutreachCampaign from './pages/OutreachCampaign';
 import SettingsPage from './pages/Settings';
+import LenderMaster from './pages/LenderMaster';
+import FollowUps from './pages/FollowUps';
+import RevenueTracking from './pages/RevenueTracking';
 import supabase from './services/supabaseClient';
 
 export default function App() {
@@ -46,12 +49,11 @@ export default function App() {
         <nav className="flex-1 p-4 space-y-2">
           {[
             { icon: LayoutDashboard, label: 'Dashboard' },
-            { icon: MessageSquare, label: 'Communication Center' },
-            { icon: Smartphone, label: 'Cold Outreach' },
             { icon: Users, label: 'Customers' },
-            { icon: ShieldCheck, label: 'Credit Policies' },
-            { icon: BookOpen, label: 'Insights Manager' },
-            { icon: FileText, label: 'Loan Applications' },
+            { icon: Calendar, label: 'Follow Ups' },
+            { icon: MessageSquare, label: 'Communication Center' },
+            { icon: ShieldCheck, label: 'Lender Master' },
+            { icon: DollarSign, label: 'Revenue Tracking' },
             { icon: Settings, label: 'Settings' }
           ].map((item, i) => (
             <button 
@@ -107,17 +109,12 @@ export default function App() {
             ) : (
               <Customers onSelectCustomer={setSelectedCustomerId} />
             )
-          ) : activeTab === 'Credit Policies' ? (
-            <PolicyManager />
-          ) : activeTab === 'Insights Manager' ? (
-            <BlogManager />
-          ) : activeTab === 'Loan Applications' ? (
-            <LoanApplications 
-              onSelectCustomer={(customerId) => {
-                setSelectedCustomerId(customerId);
-                setActiveTab('Customers');
-              }} 
-            />
+          ) : activeTab === 'Lender Master' ? (
+            <LenderMaster />
+          ) : activeTab === 'Follow Ups' ? (
+            <FollowUps />
+          ) : activeTab === 'Revenue Tracking' ? (
+            <RevenueTracking />
           ) : activeTab === 'Settings' ? (
             <SettingsPage />
           ) : (

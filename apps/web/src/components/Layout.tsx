@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { IndianRupee, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
+import Megafoot from './Megafoot';
 import Footer from './Footer';
 import ChatBot from './ChatBot';
 import WhatsAppWidget from './WhatsAppWidget';
@@ -10,10 +11,11 @@ import { supabase } from '../utils/supabaseClient';
 
 export default function Layout() {
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '';
   const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hasSession, setHasSession] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -24,16 +26,54 @@ export default function Layout() {
     });
     return () => subscription.unsubscribe();
   }, []);
-  
+
+  // Window scroll listener for scroll progress bar
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        setScrollProgress((window.scrollY / totalHeight) * 100);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Performance-tuned cursor glow
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.documentElement.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col relative">
+    <div className="min-h-screen bg-slate-50 flex flex-col relative overflow-hidden">
+      {/* Fixed top scroll progress bar */}
+      <div 
+        className="fixed top-0 left-0 h-[3px] bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 z-50 transition-all duration-75" 
+        style={{ width: `${scrollProgress}%` }} 
+      />
+
+      {/* Mouse follow cursor glow container */}
+      <div 
+        className="fixed pointer-events-none inset-0 z-30 transition-opacity duration-300 bg-[radial-gradient(500px_at_var(--mouse-x,_0px)_var(--mouse-y,_0px),rgba(59,130,246,0.05),transparent_80%)]" 
+      />
+
+      {/* Navigation */}
       <nav className={`fixed w-full z-40 transition-colors duration-300 border-b ${isHome ? 'bg-white/80 backdrop-blur-md border-slate-100' : 'bg-white border-slate-200 shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <Link to="/" className="flex items-center gap-2">
               <img src="/logo.png" alt="Click India Capital Logo" className="w-10 h-10 rounded-xl object-contain drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-              <span className="font-bold text-2xl text-slate-900 tracking-tight">Click India Capital</span>
+              <div className="text-left">
+                <span className="font-bold text-2xl text-slate-900 tracking-tight block leading-none">Click India Capital</span>
+                <span className="text-[9px] font-black text-blue-600 tracking-widest uppercase mt-1 block">Premium Advisory</span>
+              </div>
             </Link>
+            
             <div className="hidden md:flex gap-8 items-center">
               <Link to="/" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.home')}</Link>
               <Link to="/about" className="text-slate-600 hover:text-blue-600 font-medium transition-colors">{t('nav.aboutUs')}</Link>
@@ -106,9 +146,16 @@ export default function Layout() {
           </div>
         )}
       </nav>
+
+      {/* Main Outlet */}
       <main className="flex-1 pt-20">
         <Outlet />
       </main>
+
+      {/* Pre-footer Callout card */}
+      <Megafoot />
+
+      {/* Footer */}
       <Footer />
       <ChatBot />
       <WhatsAppWidget />

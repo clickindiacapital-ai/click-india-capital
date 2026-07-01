@@ -29,6 +29,16 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
     try {
       const customerId = 'cust_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
       
+      const income = parseFloat(monthlyIncome) || 0;
+      const loanAmt = parseFloat(loanAmount) || 0;
+      
+      let temp = '⚪ Cold';
+      if (income > 50000 && loanAmt > 500000) {
+        temp = '🔥 Hot';
+      } else if (income >= 25000) {
+        temp = '🟡 Warm';
+      }
+
       const { error: customerError } = await supabase
         .from('customers')
         .insert([{
@@ -37,26 +47,15 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
           phone,
           email: email || `manual_${phone}@clickindia.in`,
           employment_type: employmentType,
-          monthly_income: parseFloat(monthlyIncome) || 0
+          monthly_income: income,
+          loan_type: loanType,
+          loan_amount: loanAmt,
+          lead_temperature: temp,
+          lead_status: 'New',
+          lead_source: 'Manual'
         }]);
 
       if (customerError) throw customerError;
-
-      if (addAsLead) {
-        const { error: leadError } = await supabase
-          .from('leads')
-          .insert([{
-            customer_id: customerId,
-            name,
-            email: email || `manual_${phone}@clickindia.in`,
-            phone,
-            loan_type: loanType,
-            loan_amount: parseFloat(loanAmount) || 0,
-            status: 'NEW',
-            source: 'Manual Import'
-          }]);
-        if (leadError) throw leadError;
-      }
 
       setName('');
       setPhone('');
@@ -84,7 +83,8 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
 
   const fetchCustomers = async () => {
     setIsLoading(true);
-    const { data } = await customerService.getAllCustomers();
+    const { data, error } = await supabase.from('customers').select('*').order('created_at', { ascending: false });
+    if (error) console.error('Error fetching customers:', error);
     setCustomers(data || []);
     setIsLoading(false);
   };
@@ -135,9 +135,9 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
                 <tr className="bg-slate-50 border-b border-slate-200">
                   <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Client Name</th>
                   <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Contact</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Active Loans</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Total Disbursed</th>
-                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">LTV</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Temp</th>
+                  <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Loan Info</th>
                   <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
@@ -180,15 +180,18 @@ export default function Customers({ onSelectCustomer }: { onSelectCustomer?: (id
                         <p className="text-xs text-slate-500">{customer.email}</p>
                       </td>
                       <td className="py-4 px-6">
-                        <span className="px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">
-                          {customer.active_loans} Active
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">
+                          {customer.lead_status || 'New'}
                         </span>
                       </td>
                       <td className="py-4 px-6">
-                        <p className="text-sm font-bold text-slate-900">₹{(customer.total_loans_disbursed || 0).toLocaleString('en-IN')}</p>
+                        <span className="px-2.5 py-1 bg-slate-50 rounded-full text-xs font-bold">
+                          {customer.lead_temperature || '⚪ Cold'}
+                        </span>
                       </td>
                       <td className="py-4 px-6">
-                        <p className="text-sm font-bold text-blue-600">₹{(customer.lifetime_value || 0).toLocaleString('en-IN')}</p>
+                        <p className="text-sm font-bold text-slate-900">{customer.loan_type || 'N/A'}</p>
+                        <p className="text-xs text-slate-500">₹{(customer.loan_amount || 0).toLocaleString('en-IN')}</p>
                       </td>
                       <td className="py-4 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1">

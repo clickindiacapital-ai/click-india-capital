@@ -16,6 +16,7 @@
     "@click-india/shared-governance": "workspace:*",
     "@click-india/shared-services": "workspace:*",
     "@click-india/shared-types": "workspace:*",
+    "@click-india/shared-utils": "workspace:*",
     "@supabase/supabase-js": "^2.105.4",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.8",

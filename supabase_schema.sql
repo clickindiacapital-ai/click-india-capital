@@ -1,6 +1,13 @@
 -- Click Capital Loan Advisory Operating System - Schema Setup
 
 -- DROP EXISTING TABLES (Clean Slate)
+DROP TABLE IF EXISTS public.revenues CASCADE;
+DROP TABLE IF EXISTS public.followups CASCADE;
+DROP TABLE IF EXISTS public.loan_comparisons CASCADE;
+DROP TABLE IF EXISTS public.matches CASCADE;
+DROP TABLE IF EXISTS public.eligibility_rules CASCADE;
+DROP TABLE IF EXISTS public.lenders CASCADE;
+DROP TABLE IF EXISTS public.lead_sources CASCADE;
 DROP TABLE IF EXISTS public.customer_messages CASCADE;
 DROP TABLE IF EXISTS public.consulting_sessions CASCADE;
 DROP TABLE IF EXISTS public.customer_timeline CASCADE;
@@ -21,6 +28,7 @@ CREATE TABLE public.customers (
     phone TEXT NOT NULL,
     whatsapp TEXT,
     dob DATE,
+    age INTEGER,
     city TEXT,
     state TEXT,
     -- Professional
@@ -35,6 +43,12 @@ CREATE TABLE public.customers (
     credit_score INTEGER,
     existing_loans_count INTEGER DEFAULT 0,
     credit_card_outstanding NUMERIC DEFAULT 0,
+    -- Loan Matchmaking specific
+    loan_type TEXT,
+    loan_amount NUMERIC,
+    lead_source TEXT,
+    lead_status TEXT DEFAULT 'New', -- New, Contacted, Eligibility Checked, Matched, Forwarded, Converted, Closed
+    lead_temperature TEXT DEFAULT 'Cold', -- Hot, Warm, Cold
     -- Goal & Classification
     primary_goal TEXT,
     tags TEXT[],
@@ -165,35 +179,119 @@ CREATE POLICY "Enable read access for authenticated users" ON public.customer_me
 CREATE POLICY "Enable insert for authenticated users" ON public.customer_messages FOR INSERT TO authenticated WITH CHECK (true);
 CREATE POLICY "Enable update for authenticated users" ON public.customer_messages FOR UPDATE TO authenticated USING (true);
 
--- 9. Lender Policies Table (Credit Policy Rule Engine)
-DROP TABLE IF EXISTS public.lender_policies CASCADE;
-CREATE TABLE public.lender_policies (
+-- 9. Lenders Table (Lender Master)
+DROP TABLE IF EXISTS public.lenders CASCADE;
+CREATE TABLE public.lenders (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    bank_name TEXT NOT NULL,
+    lender_name TEXT NOT NULL,
     logo_url TEXT,
-    min_cibil INTEGER DEFAULT 0,
+    loan_type TEXT[], -- e.g., ['Personal Loan', 'Business Loan', 'Home Loan']
     min_income NUMERIC DEFAULT 0,
-    max_foir_percentage NUMERIC DEFAULT 100, -- Maximum Fixed Obligation to Income Ratio (EMI / Income * 100)
-    allowed_employment_types TEXT[], -- ['Salaried', 'Self-Employed']
-    allowed_loan_types TEXT[], -- ['Home Loan', 'Personal Loan', 'Vehicle Loan', 'Business Loan']
-    base_interest_rate NUMERIC NOT NULL, -- starting rate (e.g. 8.5)
+    max_age INTEGER DEFAULT 60,
+    min_age INTEGER DEFAULT 21,
+    max_foir NUMERIC DEFAULT 100, -- Maximum Fixed Obligation to Income Ratio
+    employment_type TEXT[], -- ['Salaried', 'Self-Employed']
+    interest_rate NUMERIC NOT NULL,
+    processing_fee NUMERIC NOT NULL DEFAULT 0,
+    tenure_range TEXT, -- e.g., '12-60 months'
     active BOOLEAN DEFAULT true,
     notes TEXT
 );
 
-ALTER TABLE public.lender_policies ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Enable read access for everyone" ON public.lender_policies FOR SELECT TO anon, authenticated USING (true);
-CREATE POLICY "Enable all access for authenticated users" ON public.lender_policies FOR ALL TO authenticated USING (true) WITH CHECK (true);
+ALTER TABLE public.lenders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable read access for everyone" ON public.lenders FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Enable all access for authenticated users" ON public.lenders FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- Seed Lender Policies
-INSERT INTO public.lender_policies (bank_name, min_cibil, min_income, max_foir_percentage, allowed_employment_types, allowed_loan_types, base_interest_rate, notes)
+-- Seed Lenders
+INSERT INTO public.lenders (lender_name, min_income, max_foir, employment_type, loan_type, interest_rate, processing_fee, tenure_range, notes)
 VALUES 
-('HDFC Bank', 720, 30000, 50, ARRAY['Salaried', 'Self-Employed'], ARRAY['Home Loan', 'Personal Loan', 'Business Loan'], 8.50, 'Preferred prime lender for salaried professionals.'),
-('State Bank of India', 740, 25000, 45, ARRAY['Salaried'], ARRAY['Home Loan', 'Personal Loan', 'Vehicle Loan'], 8.40, 'Govt bank with low interest, high documentation focus.'),
-('ESAF Small Finance Bank', 650, 15000, 60, ARRAY['Salaried', 'Self-Employed'], ARRAY['Vehicle Loan', 'Business Loan', 'Personal Loan'], 11.50, 'Excellent for small business owners and vehicles.'),
-('Mahindra Finance', 620, 18000, 65, ARRAY['Self-Employed'], ARRAY['Vehicle Loan', 'Business Loan'], 12.00, 'Strong presence in rural and semi-urban vehicle markets.'),
-('Volkswagen Finance', 680, 35000, 55, ARRAY['Salaried', 'Self-Employed'], ARRAY['Vehicle Loan'], 9.50, 'Specialized automotive financing for premium cars.');
+('HDFC Bank', 30000, 50, ARRAY['Salaried', 'Self-Employed'], ARRAY['Home Loan', 'Personal Loan', 'Business Loan'], 10.50, 1.5, '12-60 months', 'Preferred prime lender for salaried professionals.'),
+('ICICI Bank', 25000, 50, ARRAY['Salaried', 'Self-Employed'], ARRAY['Home Loan', 'Personal Loan', 'Vehicle Loan'], 10.75, 2.0, '12-72 months', 'Fast processing for pre-approved customers.'),
+('Axis Bank', 25000, 55, ARRAY['Salaried', 'Self-Employed'], ARRAY['Personal Loan', 'Business Loan'], 11.25, 2.0, '12-60 months', 'Good for medium sized loans.'),
+('Federal Bank', 20000, 60, ARRAY['Salaried', 'Self-Employed'], ARRAY['Personal Loan'], 11.50, 2.5, '12-48 months', 'Flexible policies for lower income segments.');
+
+-- 9.1 Eligibility Rules Table
+CREATE TABLE public.eligibility_rules (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    lender_id UUID REFERENCES public.lenders(id) NOT NULL,
+    rule_type TEXT NOT NULL, -- 'INCOME', 'AGE', 'FOIR', 'EMPLOYMENT'
+    operator TEXT NOT NULL, -- '>', '<', '=', 'BETWEEN'
+    value_1 TEXT NOT NULL,
+    value_2 TEXT,
+    score_modifier INTEGER DEFAULT 0 -- e.g., +10 to match score if passed
+);
+
+ALTER TABLE public.eligibility_rules ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.eligibility_rules FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9.2 Matches Table
+CREATE TABLE public.matches (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID REFERENCES public.customers(id) NOT NULL,
+    lender_id UUID REFERENCES public.lenders(id) NOT NULL,
+    match_score INTEGER NOT NULL,
+    eligibility_status TEXT NOT NULL DEFAULT 'Tentative',
+    matched_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.matches ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.matches FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9.3 Loan Comparisons Table
+CREATE TABLE public.loan_comparisons (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID REFERENCES public.customers(id) NOT NULL,
+    generated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    compared_lenders JSONB NOT NULL, -- Array of lender IDs and their stats at the time
+    selected_lender_id UUID REFERENCES public.lenders(id),
+    status TEXT NOT NULL DEFAULT 'Generated' -- 'Generated', 'Selected'
+);
+
+ALTER TABLE public.loan_comparisons ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.loan_comparisons FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9.4 Follow Ups Table
+CREATE TABLE public.followups (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID REFERENCES public.customers(id) NOT NULL,
+    follow_up_date DATE NOT NULL,
+    follow_up_time TIME,
+    remarks TEXT,
+    status TEXT NOT NULL DEFAULT 'Pending', -- 'Pending', 'Completed', 'Missed'
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.followups ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.followups FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9.5 Revenues Table
+CREATE TABLE public.revenues (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    customer_id UUID REFERENCES public.customers(id) NOT NULL,
+    lender_id UUID REFERENCES public.lenders(id) NOT NULL,
+    loan_type TEXT NOT NULL,
+    loan_amount NUMERIC NOT NULL,
+    revenue_earned NUMERIC NOT NULL DEFAULT 0,
+    revenue_status TEXT NOT NULL DEFAULT 'Pending', -- 'Pending', 'Received'
+    earned_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.revenues ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.revenues FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- 9.6 Lead Sources Table
+CREATE TABLE public.lead_sources (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    source_name TEXT NOT NULL,
+    active BOOLEAN DEFAULT true
+);
+
+ALTER TABLE public.lead_sources ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for authenticated users" ON public.lead_sources FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
+-- Seed Lead Sources
+INSERT INTO public.lead_sources (source_name) VALUES ('Google'), ('Facebook'), ('WhatsApp'), ('Organic'), ('Referral');
 
 -- 10. Blog Posts Table (Insights CMS)
 DROP TABLE IF EXISTS public.blog_posts CASCADE;

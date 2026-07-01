@@ -26,6 +26,10 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('DETAILS');
+  
+  // Matchmaking States
+  const [matches, setMatches] = useState<any[]>([]);
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false);
 
   // Activity and Consultation Logs States
   const [isActivityModalOpen, setIsActivityModalOpen] = useState(false);
@@ -52,12 +56,12 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
     }
   }, [customer]);
 
-  const handleWhatsAppClick = (phoneNum: string) => {
+  const handleWhatsAppClick = (phoneNum: string, customMessage?: string) => {
     if (!phoneNum) return;
     const cleanPhone = phoneNum.replace(/[^0-9]/g, '');
     const fullPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
-    const greeting = `Hello ${customer?.name || ''}, this is the advisory team from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
-    const encodedText = encodeURIComponent(greeting);
+    const defaultGreeting = `Hello ${customer?.name || ''}, this is the advisory team from Click India Capital. I am following up on your loan inquiry. How can I assist you today?`;
+    const encodedText = encodeURIComponent(customMessage || defaultGreeting);
     window.open(`https://wa.me/${fullPhone}?text=${encodedText}`, '_blank');
   };
 
@@ -126,18 +130,120 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
   const fetchCustomerData = async () => {
     setLoading(true);
     try {
-      const { data: cData } = await customerService.getCustomerById(customerId);
-      const { data: tData } = await customerService.getTimeline(customerId);
-      const { data: dData } = await customerService.getDocuments(customerId);
+      const { data: cData } = await supabase.from('customers').select('*').eq('id', customerId).single();
+      const { data: tData } = await supabase.from('customer_timeline').select('*').eq('customer_id', customerId).order('event_date', { ascending: false });
+      const { data: mData } = await supabase.from('matches').select('*, lenders(*)').eq('customer_id', customerId).order('match_score', { ascending: false });
       
       setCustomer(cData);
       setTimeline(tData || []);
-      setDocuments(dData || []);
+      setMatches(mData || []);
     } catch (e) {
       console.error(e);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCheckEligibility = async () => {
+    if (!customer) return;
+    setIsCheckingEligibility(true);
+    
+    try {
+      // Fetch all active lenders
+      const { data: lenders } = await supabase.from('lenders').select('*').eq('active', true);
+      if (!lenders) return;
+
+      const newMatches = [];
+      const cIncome = Number(customer.monthly_income) || 0;
+      const cAge = Number(customer.age) || 30; // default if not set
+      
+      for (const lender of lenders) {
+        // Basic hardcoded rule engine based on instructions
+        let score = 100;
+        if (cIncome < lender.min_income) {
+           score -= 30; // Deduct if income below min
+        } else if (cIncome > lender.min_income * 2) {
+           score += 10;
+        }
+
+        if (cAge < lender.min_age || cAge > lender.max_age) {
+           score -= 40;
+        }
+
+        if (lender.employment_type && !lender.employment_type.includes(customer.employment_type)) {
+           score -= 50;
+        }
+        
+        // Cap score
+        score = Math.max(0, Math.min(100, score));
+
+        newMatches.push({
+          customer_id: customerId,
+          lender_id: lender.id,
+          match_score: score,
+          eligibility_status: 'Tentative'
+        });
+      }
+
+      // Save matches
+      if (newMatches.length > 0) {
+        await supabase.from('matches').delete().eq('customer_id', customerId); // clear old
+        await supabase.from('matches').insert(newMatches);
+        
+        await supabase.from('customer_timeline').insert([{
+          customer_id: customerId,
+          event_type: 'ELIGIBILITY_CHECK',
+          description: `Eligibility checked. Matched with ${newMatches.length} lenders.`
+        }]);
+        
+        await supabase.from('customers').update({ lead_status: 'Eligibility Checked' }).eq('id', customerId);
+      }
+
+      await fetchCustomerData();
+      setActiveTab('COMPARISON');
+    } catch (error) {
+      console.error("Failed to check eligibility:", error);
+    } finally {
+      setIsCheckingEligibility(false);
+    }
+  };
+
+  const handleSelectLender = async (lenderId: string, lenderName: string) => {
+    try {
+      // Create comparison record
+      await supabase.from('loan_comparisons').insert([{
+        customer_id: customerId,
+        compared_lenders: matches.map(m => m.lenders),
+        selected_lender_id: lenderId,
+        status: 'Selected'
+      }]);
+
+      await supabase.from('customer_timeline').insert([{
+        customer_id: customerId,
+        event_type: 'LENDER_SELECTED',
+        description: `Customer selected ${lenderName} for forwarding.`
+      }]);
+
+      await supabase.from('customers').update({ lead_status: 'Forwarded' }).eq('id', customerId);
+
+      alert(`Lead marked as forwarded to ${lenderName}!`);
+      fetchCustomerData();
+    } catch (e) {
+      console.error("Failed to select lender:", e);
+    }
+  };
+
+  const sendWhatsAppResults = () => {
+    if (!customer || matches.length === 0) return;
+    const topMatches = matches.filter(m => m.match_score >= 50).slice(0, 3);
+    const msg = `Hi ${customer.name},
+
+Based on your profile, you may be tentatively eligible with:
+${topMatches.map(m => `• ${m.lenders?.lender_name} (Score: ${m.match_score}%)`).join('\n')}
+
+This is only a tentative assessment and does not guarantee approval.
+Reply YES if you would like assistance.`;
+    handleWhatsAppClick(customer.phone, msg);
   };
 
   const handleAddToDNC = async () => {
@@ -267,11 +373,14 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
                     </svg>
                   </button>
                 </div>
-                {customer.primary_goal && (
+                {customer.lead_status && (
                   <span className="px-2.5 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                    Goal: {customer.primary_goal}
+                    Status: {customer.lead_status}
                   </span>
                 )}
+                <span className="px-2.5 py-0.5 bg-orange-100 text-orange-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  Temp: {customer.lead_temperature || 'Cold'}
+                </span>
                 {(customer.tags || []).map((tag: string, i: number) => (
                   <span key={i} className="px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wider">
                     {tag}
@@ -308,7 +417,7 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
       {/* Navigation */}
       <div className="px-8 border-b border-slate-200 bg-white">
         <div className="flex gap-8">
-          {['DETAILS', 'TIMELINE', 'LOAN HEALTH', 'DOCUMENTS', 'CONSULTATIONS'].map(tab => (
+          {['DETAILS', 'TIMELINE', 'ELIGIBILITY', 'COMPARISON'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -456,153 +565,89 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
             </div>
           )}
 
-          {activeTab === 'LOAN HEALTH' && (
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                 <div>
-                   <h3 className="font-black text-xl mb-6">Financial Fitness Radar</h3>
-                   <div className="space-y-6">
-                      {[
-                        { label: 'Income Stability', val: metricIncome, setVal: setMetricIncome, color: 'blue' },
-                        { label: 'Credit Behaviour', val: metricCredit, setVal: setMetricCredit, color: 'purple' },
-                        { label: 'EMI Burden', val: metricEmi, setVal: setMetricEmi, color: 'orange' },
-                        { label: 'Documentation Readiness', val: metricDoc, setVal: setMetricDoc, color: 'emerald' },
-                      ].map(metric => (
-                        <div key={metric.label} className="space-y-2">
-                          <div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-slate-500">
-                            <span>{metric.label}</span>
-                            <span className="text-slate-900 font-black">{metric.val}/10</span>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <input 
-                              type="range"
-                              min="0"
-                              max="10"
-                              value={metric.val}
-                              onChange={(e) => metric.setVal(parseInt(e.target.value))}
-                              className="w-full cursor-pointer accent-blue-600"
-                            />
-                          </div>
-                        </div>
-                      ))}
-                   </div>
-                 </div>
-                 
-                 <button
-                   onClick={handleUpdateMetrics}
-                   disabled={savingMetrics}
-                   className="w-full mt-8 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-all shadow-md shadow-blue-100 flex items-center justify-center gap-2 cursor-pointer"
-                 >
-                   {savingMetrics ? (
-                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                   ) : (
-                     'Update Metrics & Score'
-                   )}
-                 </button>
-              </div>
-              <div className="bg-blue-50 p-8 rounded-3xl border border-blue-100 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                  <Shield className="text-blue-600" />
-                  <h3 className="font-black text-xl text-blue-900">AI Recommendations</h3>
+          {activeTab === 'ELIGIBILITY' && (
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm text-center">
+                <Shield className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                <h3 className="font-black text-2xl text-slate-900 mb-2">Check Eligibility Match</h3>
+                <p className="text-slate-500 mb-6 max-w-md mx-auto">
+                  Run this customer's profile against our lender rules to find the best tentative matches.
+                </p>
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm mb-6 text-left">
+                  <strong>Disclaimer:</strong> This is a tentative eligibility assessment based on available data and does not guarantee approval. No documents are verified at this stage.
                 </div>
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-50">
-                    <h4 className="font-bold text-sm text-slate-900">Reduce EMI Burden</h4>
-                    <p className="text-xs text-slate-600 mt-1">Current FOIR is slightly high. Recommend paying off the credit card outstanding to improve eligibility for a home loan.</p>
-                  </div>
-                  <div className="bg-white p-4 rounded-xl shadow-sm border border-blue-50">
-                    <h4 className="font-bold text-sm text-slate-900">Documentation Gap</h4>
-                    <p className="text-xs text-slate-600 mt-1">Missing latest 3 months Salary Slips. Request these before submitting the application to HDFC.</p>
-                  </div>
-                </div>
+                <button
+                  onClick={handleCheckEligibility}
+                  disabled={isCheckingEligibility}
+                  className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-md hover:bg-blue-700 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+                >
+                  {isCheckingEligibility ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
+                  {isCheckingEligibility ? 'Processing...' : 'Run Eligibility Check'}
+                </button>
               </div>
             </div>
           )}
 
-          {activeTab === 'DOCUMENTS' && (
+          {activeTab === 'COMPARISON' && (
             <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
               <div className="flex justify-between items-center mb-8">
-                <h3 className="font-black text-xl">Document Vault</h3>
-                <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm hover:bg-blue-700">
-                  <Plus size={16} /> Request Document
+                <h3 className="font-black text-xl text-slate-900">Recommended Lenders</h3>
+                <button 
+                  onClick={sendWhatsAppResults}
+                  className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors"
+                >
+                  <MessageSquare size={16} /> Send via WhatsApp
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {['PAN', 'AADHAAR', 'SALARY_SLIP', 'BANK_STATEMENT', 'ITR'].map((docType) => {
-                  const dbDoc = documents.find(d => d.document_type === docType);
-                  return (
-                    <div 
-                      key={docType} 
-                      className={`border rounded-2xl p-5 flex flex-col justify-between gap-4 transition-all ${
-                        dbDoc?.status === 'VERIFIED' ? 'border-emerald-200 bg-emerald-50/10' :
-                        dbDoc?.status === 'REJECTED' ? 'border-red-200 bg-red-50/10' :
-                        dbDoc ? 'border-blue-200 bg-blue-50/10' : 'border-slate-200 hover:border-slate-300'
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                          dbDoc?.status === 'VERIFIED' ? 'bg-emerald-100 text-emerald-600' :
-                          dbDoc?.status === 'REJECTED' ? 'bg-red-100 text-red-600' :
-                          dbDoc ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-400'
-                        }`}>
-                          <FileText size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-900">{docLabels[docType]}</h4>
-                          <div className="mt-1 flex flex-col gap-1 text-[10px] text-slate-500 uppercase tracking-wider font-bold">
-                            {dbDoc ? (
-                              <>
-                                <span className={
-                                  dbDoc.status === 'VERIFIED' ? 'text-emerald-600' :
-                                  dbDoc.status === 'REJECTED' ? 'text-red-500' : 'text-blue-600'
-                                }>
-                                  Status: {dbDoc.status}
-                                </span>
-                                {dbDoc.uploaded_at && (
-                                  <span className="text-slate-400 font-medium normal-case">
-                                    Uploaded: {new Date(dbDoc.uploaded_at).toLocaleDateString()}
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              <span className="text-orange-500">Pending Upload</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
 
-                      {dbDoc && (
-                        <div className="flex flex-col gap-2 pt-2 border-t border-slate-100">
-                          <button 
-                            onClick={() => handleViewDocument(dbDoc.file_url)}
-                            className="w-full text-center bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm"
-                          >
-                            View / Download
-                          </button>
-                          <div className="flex gap-2">
-                            {dbDoc.status !== 'VERIFIED' && (
-                              <button 
-                                onClick={() => handleUpdateDocStatus(dbDoc.id, 'VERIFIED', docType)}
-                                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1"
-                              >
-                                <Check size={12} /> Verify
-                              </button>
-                            )}
-                            {dbDoc.status !== 'REJECTED' && (
-                              <button 
-                                onClick={() => handleUpdateDocStatus(dbDoc.id, 'REJECTED', docType)}
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1"
-                              >
-                                <CloseIcon size={12} /> Reject
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              {matches.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">
+                  No matches found. Please run the Eligibility Check first.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                        <th className="p-4 rounded-tl-xl">Lender</th>
+                        <th className="p-4">Match Score</th>
+                        <th className="p-4">Interest Rate</th>
+                        <th className="p-4">Processing Fee</th>
+                        <th className="p-4">Est. Max Tenure</th>
+                        <th className="p-4 rounded-tr-xl text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {matches.map((match) => (
+                        <tr key={match.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="p-4 font-bold text-slate-900">
+                            {match.lenders?.lender_name}
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                              match.match_score >= 80 ? 'bg-green-100 text-green-700' :
+                              match.match_score >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                            }`}>
+                              {match.match_score}%
+                            </span>
+                          </td>
+                          <td className="p-4 text-slate-700 font-medium">{match.lenders?.interest_rate}%</td>
+                          <td className="p-4 text-slate-700 font-medium">{match.lenders?.processing_fee}%</td>
+                          <td className="p-4 text-slate-700 font-medium">{match.lenders?.tenure_range}</td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => handleSelectLender(match.lender_id, match.lenders?.lender_name)}
+                              className="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 hover:border-transparent px-4 py-1.5 rounded-lg text-sm font-bold transition-all"
+                            >
+                              Select
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
           
@@ -677,7 +722,3 @@ export default function CustomerProfile({ customerId, onBack }: CustomerProfileP
   );
 }
 
-// Dummy loader to fix unresolved import
-const Loader2 = ({ className, size }: { className?: string, size?: number }) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-);

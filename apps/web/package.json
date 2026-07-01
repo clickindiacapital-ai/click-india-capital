@@ -15,6 +15,7 @@
     "@click-india/shared-services": "workspace:*",
     "@click-india/shared-types": "workspace:*",
     "@click-india/shared-ui": "workspace:*",
+    "@click-india/shared-utils": "workspace:*",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
